@@ -8,6 +8,7 @@ import type {
   Stock,
   Strategy,
 } from '../shared/contracts';
+import { AuthBoundary, ApiError, type Session } from './AuthBoundary';
 
 const dollars = new Intl.NumberFormat('en-US', {
   style: 'currency',
@@ -141,7 +142,8 @@ async function request(path: string, body?: object): Promise<AppState> {
   });
   const data = (await response.json().catch(() => null)) as (AppState & { error?: string }) | null;
   if (!response.ok)
-    throw new Error(
+    throw new ApiError(
+      response.status,
       data?.error ||
         (response.status >= 500
           ? 'The service was interrupted. A dispatch may already have happened. Wait for reconnection, then check and recover.'
@@ -173,14 +175,20 @@ function AppHeader({
   connected,
   onReset,
   onDownload,
+  demoControls,
+  session,
+  onLogout,
 }: {
   busy: boolean;
   connected: boolean;
   onReset: () => void;
   onDownload: () => void;
+  demoControls: boolean;
+  session: Session;
+  onLogout: () => void;
 }) {
   return (
-    <header className="app-header">
+    <header className={`app-header ${session.mode === 'pilot' ? 'pilot-header' : ''}`}>
       <a className="brand" href="/" aria-label="Replan home">
         <span className="brand-mark">
           <svg viewBox="0 0 32 32" fill="none" aria-hidden="true">
@@ -197,6 +205,14 @@ function AppHeader({
       </a>
       <span className="header-caption">DECISIONS THAT SURVIVE REALITY</span>
       <div className="header-actions">
+        {session.mode === 'pilot' && session.principal && (
+          <span className="operator-identity">
+            <strong>{session.principal.name}</strong>
+            <span>
+              {session.principal.role} · {session.principal.workspaceId}
+            </span>
+          </span>
+        )}
         <span className={`connection ${connected ? '' : 'offline'}`}>
           <i />
           {connected ? 'System connected' : 'Reconnecting'}
@@ -205,10 +221,17 @@ function AppHeader({
           <Icon name="download" size={16} />
           <span>Export evidence</span>
         </button>
-        <button className="button subtle small" onClick={onReset} disabled={busy}>
-          <Icon name="refresh" size={15} />
-          <span>Reset demo</span>
-        </button>
+        {demoControls && (
+          <button className="button subtle small" onClick={onReset} disabled={busy}>
+            <Icon name="refresh" size={15} />
+            <span>Reset demo</span>
+          </button>
+        )}
+        {session.mode === 'pilot' && (
+          <button className="button subtle small" onClick={onLogout} disabled={busy}>
+            Sign out
+          </button>
+        )}
       </div>
     </header>
   );
@@ -403,13 +426,16 @@ function PlanDetail({
   busy,
   confirmedOrders,
   mutate,
+  demoControls,
 }: {
   plan: Plan;
   state: AppState;
   busy: boolean;
   confirmedOrders: ReadonlySet<string>;
   mutate: (path: string, body?: object, notice?: string) => Promise<void>;
+  demoControls: boolean;
 }) {
+  const [cancelReason, setCancelReason] = useState('');
   const active = ['approved', 'executing'].includes(plan.status);
   const recovery = ['uncertain', 'executing'].includes(plan.status);
   const remainderHandled = plan.solution.allocations.every((allocation) =>
@@ -545,6 +571,46 @@ function PlanDetail({
           </div>
         </div>
       )}
+      {(active || recovery) && (
+        <details className="cancellation-block">
+          <summary>Cancel remaining transfers</summary>
+          <p>
+            Replan asks the carrier to close unconfirmed requests before releasing stock. Confirmed
+            shipments remain committed. Any changed remaining work needs a new plan and approval. If
+            the carrier cannot confirm cancellation, the plan stays on hold.
+          </p>
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              if (busy || cancelReason.trim().length < 10) return;
+              void mutate(
+                `/api/plans/${plan.id}/cancel`,
+                { reason: cancelReason.trim() },
+                'Cancellation attempt recorded. Review confirmed shipments and any remaining holds.',
+              );
+            }}
+          >
+            <label htmlFor={`cancel-${plan.id}`}>Reason for cancellation</label>
+            <textarea
+              id={`cancel-${plan.id}`}
+              value={cancelReason}
+              onChange={(event) => setCancelReason(event.target.value)}
+              minLength={10}
+              maxLength={1000}
+              required
+              disabled={busy}
+              placeholder="Explain why the remaining transfers should stop."
+            />
+            <button
+              className="button secondary small"
+              type="submit"
+              disabled={busy || cancelReason.trim().length < 10}
+            >
+              Cancel remaining transfers
+            </button>
+          </form>
+        </details>
+      )}
       {plan.status === 'needs_replan' && (
         <div className={`recovery-hint ${remainderHandled ? 'completed' : ''}`}>
           <Icon name={remainderHandled ? 'check' : 'refresh'} size={20} />
@@ -569,7 +635,7 @@ function PlanDetail({
             <strong>All transfers in this plan are confirmed.</strong>
             <p>
               Carrier dispatch records are attached to each action below. No delivery confirmation
-              is simulated.
+              {demoControls ? 'is simulated.' : 'has been recorded.'}
             </p>
           </div>
         </div>
@@ -910,6 +976,24 @@ function EventLog({ events }: { events: AuditEvent[] }) {
 }
 
 export function App() {
+  return (
+    <AuthBoundary>
+      {(session, onUnauthorized, onLogout) => (
+        <Workbench session={session} onUnauthorized={onUnauthorized} onLogout={onLogout} />
+      )}
+    </AuthBoundary>
+  );
+}
+
+export function Workbench({
+  session,
+  onUnauthorized,
+  onLogout,
+}: {
+  session: Session;
+  onUnauthorized: (mutationInFlight: boolean) => void;
+  onLogout: () => void;
+}) {
   const [state, setState] = useState<AppState | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -918,29 +1002,37 @@ export function App() {
   const [notice, setNotice] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const busyRef = useRef(false);
+  const unconfirmedRequest = useRef(false);
   const refreshingRef = useRef(false);
   const requestNumber = useRef(0);
 
-  const refresh = useCallback(async (explicit = false) => {
-    if (busyRef.current || refreshingRef.current) return;
-    refreshingRef.current = true;
-    const current = ++requestNumber.current;
-    try {
-      const data = await request('/api/state');
-      if (current !== requestNumber.current) return;
-      setState(data);
-      setConnected(true);
-      if (explicit) setError(null);
-    } catch (cause) {
-      if (current !== requestNumber.current) return;
-      setConnected(false);
-      if (explicit)
-        setError(cause instanceof Error ? cause.message : 'Unable to reach the service.');
-    } finally {
-      refreshingRef.current = false;
-      if (current === requestNumber.current) setLoading(false);
-    }
-  }, []);
+  const refresh = useCallback(
+    async (explicit = false) => {
+      if (busyRef.current || refreshingRef.current) return;
+      refreshingRef.current = true;
+      const current = ++requestNumber.current;
+      try {
+        const data = await request('/api/state');
+        if (current !== requestNumber.current) return;
+        setState(data);
+        setConnected(true);
+        if (explicit) setError(null);
+      } catch (cause) {
+        if (current !== requestNumber.current) return;
+        if (cause instanceof ApiError && cause.status === 401) {
+          onUnauthorized(busyRef.current || unconfirmedRequest.current);
+          return;
+        }
+        setConnected(false);
+        if (explicit || cause instanceof ApiError)
+          setError(cause instanceof Error ? cause.message : 'Unable to reach the service.');
+      } finally {
+        refreshingRef.current = false;
+        if (current === requestNumber.current) setLoading(false);
+      }
+    },
+    [onUnauthorized],
+  );
 
   useEffect(() => {
     void refresh();
@@ -957,14 +1049,16 @@ export function App() {
 
   const mutate = useCallback(
     async (path: string, body: object = {}, success?: string) => {
-      if (busyRef.current) return;
+      if (busyRef.current || session.principal?.role === 'viewer') return;
       busyRef.current = true;
+      unconfirmedRequest.current = true;
       setBusy(true);
       setError(null);
       setNotice(null);
       ++requestNumber.current;
       try {
         const data = await request(path, body);
+        unconfirmedRequest.current = false;
         setState(data);
         setConnected(true);
         if (path === '/api/plans')
@@ -974,6 +1068,11 @@ export function App() {
         if (path === '/api/demo/reset') setSelectedId(null);
         if (success) setNotice(success);
       } catch (cause) {
+        if (cause instanceof ApiError && cause.status === 401) {
+          onUnauthorized(true);
+          return;
+        }
+        if (cause instanceof ApiError && cause.status < 500) unconfirmedRequest.current = false;
         const message =
           cause instanceof Error ? cause.message : 'The action could not be confirmed.';
         const network =
@@ -982,7 +1081,7 @@ export function App() {
         if (network) setConnected(false);
         setError(
           network
-            ? 'Connection interrupted. A dispatch may already have happened. Wait for the development runner to reconnect, then use “Check & recover” to verify the outcome before continuing. If you started the backend directly, restart it first.'
+            ? 'Connection interrupted. A dispatch may already have happened. Wait for reconnection, then use “Check & recover” to verify the outcome before continuing.'
             : message,
         );
       } finally {
@@ -992,7 +1091,7 @@ export function App() {
         void refresh();
       }
     },
-    [refresh],
+    [refresh, onUnauthorized, session.principal?.role],
   );
 
   const download = async () => {
@@ -1000,6 +1099,10 @@ export function App() {
       const response = await fetch('/api/audit', {
         signal: AbortSignal.timeout(15_000),
       });
+      if (response.status === 401) {
+        onUnauthorized(busyRef.current || unconfirmedRequest.current);
+        return;
+      }
       if (!response.ok) throw new Error('Evidence export is currently unavailable.');
       const data: unknown = await response.json();
       const blob = new Blob([JSON.stringify(data, null, 2)], {
@@ -1019,7 +1122,9 @@ export function App() {
     ? [...state.plans].sort((a, b) => b.createdAt.localeCompare(a.createdAt))
     : [];
   const unresolved = plans.find((p) => ['approved', 'uncertain', 'executing'].includes(p.status));
-  const controlsBlocked = busy || !connected;
+  const readOnly = session.principal?.role === 'viewer';
+  const controlsBlocked = busy || !connected || readOnly;
+  const demoControls = session.mode === 'demo' && state?.runtime?.demoControls !== false;
   const propose = (strategy: Strategy) =>
     void mutate(
       '/api/plans',
@@ -1071,15 +1176,31 @@ export function App() {
           )
         }
         onDownload={() => void download()}
+        demoControls={demoControls}
+        session={session}
+        onLogout={onLogout}
       />
       <main className="app-main">
-        <div className="demo-ribbon">
-          <span className="demo-tag">PUBLIC DEMO</span>
-          <span>
-            Synthetic factories. Independent inventory and carrier services. Real failure recovery.
-          </span>
-          <span className="ribbon-end">NO LIVE SHIPMENTS</span>
-        </div>
+        {demoControls ? (
+          <div className="demo-ribbon">
+            <span className="demo-tag">PUBLIC DEMO</span>
+            <span>
+              Synthetic factories. Independent inventory and carrier services. Real failure
+              recovery.
+            </span>
+            <span className="ribbon-end">NO LIVE SHIPMENTS</span>
+          </div>
+        ) : (
+          <div className="demo-ribbon pilot-ribbon">
+            <span className="demo-tag">PRIVATE PILOT</span>
+            <span>
+              {readOnly
+                ? 'Read-only access. An operator must approve and execute changes.'
+                : 'Actions are attributed to your operator identity.'}
+            </span>
+            <span className="ribbon-end">{session.principal?.workspaceId}</span>
+          </div>
+        )}
         {error && (
           <div className="notice-banner error" role="alert">
             <Icon name="warning" />
@@ -1134,23 +1255,26 @@ export function App() {
                 <>
                   <Icon name="activity" />
                   <span>
-                    The demo is not ready yet. Start the services, or create a fresh scenario once
-                    they are running.
+                    {demoControls
+                      ? 'The demo is not ready yet. Start the services, or create a fresh scenario once they are running.'
+                      : 'This workspace is not ready yet. If it is empty, an administrator must import its scenario before planning can begin.'}
                   </span>
                 </>
               )}
             </div>
             <div className="button-group">
-              <button
-                className="button primary"
-                disabled={busy || loading}
-                onClick={() =>
-                  void mutate('/api/demo/reset', {}, 'Your synthetic scenario is ready.')
-                }
-              >
-                Start demo
-                <Icon name="arrow" />
-              </button>
+              {demoControls && (
+                <button
+                  className="button primary"
+                  disabled={busy || loading}
+                  onClick={() =>
+                    void mutate('/api/demo/reset', {}, 'Your synthetic scenario is ready.')
+                  }
+                >
+                  Start demo
+                  <Icon name="arrow" />
+                </button>
+              )}
               <button
                 className="button secondary"
                 disabled={busy}
@@ -1305,8 +1429,10 @@ export function App() {
                     <div className="inline-note">
                       <Icon name="check" size={16} />
                       <span>
-                        All repair orders have confirmed dispatches. Reset the demo to explore
-                        another disruption.
+                        All repair orders have confirmed dispatches.
+                        {demoControls
+                          ? ' Reset the demo to explore another disruption.'
+                          : ' Their execution evidence remains available below.'}
                       </span>
                     </div>
                   )}
@@ -1366,11 +1492,13 @@ export function App() {
                       </div>
                       {selected && (
                         <PlanDetail
+                          key={selected.id}
                           plan={selected}
                           state={state}
                           busy={controlsBlocked}
                           confirmedOrders={confirmedOrders}
                           mutate={mutate}
+                          demoControls={demoControls}
                         />
                       )}
                     </>
@@ -1381,7 +1509,7 @@ export function App() {
               <aside className="secondary-column">
                 <Inventory
                   stock={state.snapshot.stock}
-                  world={state.world}
+                  world={demoControls ? state.world : null}
                   observedAt={state.snapshot.observedAt}
                   busy={controlsBlocked}
                   onObserve={() =>
@@ -1392,13 +1520,15 @@ export function App() {
                     )
                   }
                 />
-                <Simulation
-                  key={state.scenario.id}
-                  state={state}
-                  busy={controlsBlocked}
-                  mutate={mutate}
-                />
-                <WorldTruth world={state.world} />
+                {demoControls && (
+                  <Simulation
+                    key={state.scenario.id}
+                    state={state}
+                    busy={controlsBlocked}
+                    mutate={mutate}
+                  />
+                )}
+                {demoControls && <WorldTruth world={state.world} />}
                 <div className="principle-note">
                   <Icon name="shield" size={20} />
                   <p>
@@ -1414,7 +1544,12 @@ export function App() {
           <span>
             <strong>replan.</strong> Built for the moment after the happy path.
           </span>
-          <span>Local demonstration · Synthetic data · Human-approved decisions</span>
+          <span>
+            {demoControls
+              ? 'Local demonstration · Synthetic data'
+              : 'Private pilot · Scoped access'}{' '}
+            · Human-approved decisions
+          </span>
         </footer>
       </main>
       {busy && (

@@ -12,5 +12,14 @@
     "resolveJsonModule": true,
     "types": ["node", "vitest/globals"]
   },
-  "include": ["src", "shared", "web", "tests", "vite.config.ts", "vitest.config.ts"]
+  "include": [
+    "src",
+    "shared",
+    "web",
+    "tests",
+    "scripts/**/*.mts",
+    "deploy/**/*.mts",
+    "vite.config.ts",
+    "vitest.config.ts"
+  ]
 }

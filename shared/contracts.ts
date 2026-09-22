@@ -86,6 +86,7 @@ export interface Action {
   error: string | null;
 }
 export interface Plan {
+  cancelReason?: string | null;
   id: string;
   scenarioId: string;
   strategy: Strategy;
@@ -134,6 +135,7 @@ export interface World {
   carrierLookupAvailable: boolean;
 }
 export interface AppState {
+  runtime?: { mode: 'demo' | 'pilot'; demoControls: boolean; workspaceId: string };
   scenario: Scenario;
   snapshot: Snapshot;
   plans: Plan[];
@@ -142,8 +144,9 @@ export interface AppState {
   serviceWarning: string | null;
 }
 
-/** All mutation endpoints return AppState unless noted. Local, synthetic demo only.
+/** Workflow mutations return AppState. Pilot access requires an authenticated workspace.
  * GET /api/state
+ * POST /api/operations {scenario} -> admin imports a preassigned provider dataset
  * POST /api/demo/reset {} -> new independent scenario epoch
  * POST /api/observe {} -> refresh cached stock, never silently changes a plan
  * POST /api/plans {strategy: 'optimized'|'greedy'}
@@ -151,8 +154,11 @@ export interface AppState {
  * POST /api/plans/:id/execute {} -> all remaining actions, stops on uncertainty/staleness
  * POST /api/plans/:id/step {} -> one action; useful to demonstrate partial progress
  * POST /api/plans/:id/recover {} -> reconcile durable intents and continue if authorized
+ * POST /api/plans/:id/cancel {reason} -> terminal provider cancellation or retained commitments
  * POST /api/demo/consume {warehouse,part,quantity} -> external stock change, NOT observation
  * POST /api/demo/fault {fault: 'lost_response'|'crash_after_dispatch'|'lookup_unavailable'|'clear'}
  * GET /api/audit -> {scenario,plans,events,world} downloadable evidence
- * Error responses {error: string}, HTTP 400/409/503.
+ * GET /api/session -> {mode,principal}; POST /api/auth/login {key}; POST /api/auth/logout {}
+ * Demo routes are absent in pilot mode; viewers cannot mutate workflow state.
+ * Error responses {error: string}, HTTP 400/401/403/404/409/503.
  */

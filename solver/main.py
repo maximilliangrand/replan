@@ -31,12 +31,12 @@ def validate_input(payload):
         if not isinstance(value, str) or not value.strip() or len(value) > 256:
             raise ValueError(f"{field} must be a nonempty string of at most 256 characters")
 
-    def number(item, field, minimum=0, integer=True):
+    def number(item, field, minimum=0, integer=True, maximum=MAX_VALUE):
         value = item.get(field)
         if isinstance(value, bool) or not isinstance(value, (int, float)):
             raise ValueError(f"{field} must be a number")
-        if not minimum <= value <= MAX_VALUE or not math.isfinite(value):
-            raise ValueError(f"{field} must be between {minimum} and {MAX_VALUE}")
+        if not minimum <= value <= maximum or not math.isfinite(value):
+            raise ValueError(f"{field} must be between {minimum} and {maximum}")
         if integer and not isinstance(value, int):
             raise ValueError(f"{field} must be an integer")
 
@@ -50,7 +50,8 @@ def validate_input(payload):
         for field in ("warehouse", "part"):
             text(stock, field)
         number(stock, "available")
-        number(stock, "version")
+        # Versions are concurrency tokens, never objective coefficients.
+        number(stock, "version", maximum=2_000_000_000)
     for lane in payload["lanes"]:
         for field in ("id", "warehouse", "factory", "mode"):
             text(lane, field)

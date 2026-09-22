@@ -1,0 +1,18 @@
+{
+	email {$ACME_EMAIL}
+	admin off
+}
+
+{$APP_DOMAIN} {
+	# Caddy must be the direct ingress. Never trust arbitrary forwarded IP headers.
+	@outside not remote_ip {$PILOT_ALLOWED_CIDRS}
+	respond @outside "Pilot access is restricted." 403
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "no-referrer"
+		X-Frame-Options "DENY"
+		-Server
+	}
+	reverse_proxy replan:4310
+}

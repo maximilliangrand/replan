@@ -1,8 +1,16 @@
 import pg from 'pg';
+import { createHash } from 'node:crypto';
+import { readFile } from 'node:fs/promises';
+import { AUTH_SCHEMA } from './auth.js';
+import { principal, workspaceId } from './workspace.js';
 import { config } from './config.js';
 import type { Action, AuditEvent, Plan, Scenario, Snapshot } from '../shared/contracts.js';
 
-export const pool = new pg.Pool({ connectionString: config.databaseUrl, max: 8 });
+export const pool = new pg.Pool({
+  connectionString: config.databaseUrl,
+  max: 8,
+  connectionTimeoutMillis: 5000,
+});
 export type Connection = pg.Pool | pg.PoolClient;
 export class Conflict extends Error {
   statusCode = 409;
@@ -11,38 +19,81 @@ export class Unavailable extends Error {
   statusCode = 503;
 }
 
+async function migrations() {
+  return [
+    {
+      version: 1,
+      sql: await readFile(new URL('./migrations/001_initial.sql', import.meta.url), 'utf8'),
+    },
+    {
+      version: 2,
+      sql: await readFile(new URL('./migrations/002_workspaces.sql', import.meta.url), 'utf8'),
+    },
+    { version: 3, sql: AUTH_SCHEMA },
+    {
+      version: 4,
+      sql: await readFile(
+        new URL('./migrations/004_operation_sources.sql', import.meta.url),
+        'utf8',
+      ),
+    },
+  ];
+}
+export async function verifySchema() {
+  const applied = (
+    await pool.query('SELECT version,checksum FROM schema_migrations ORDER BY version')
+  ).rows;
+  const expected = await migrations();
+  if (
+    applied.length !== expected.length ||
+    expected.some(
+      (item, index) =>
+        applied[index]?.version !== item.version ||
+        applied[index]?.checksum !== createHash('sha256').update(item.sql).digest('hex'),
+    )
+  )
+    throw new Error(
+      'Database migration versions do not match this release. Run the migration command before starting.',
+    );
+}
 export async function migrate() {
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS scenario_state (
-      singleton boolean PRIMARY KEY DEFAULT true CHECK(singleton),
-      scenario jsonb NOT NULL, snapshot jsonb NOT NULL,
-      created_at timestamptz NOT NULL DEFAULT now(), crash_next boolean NOT NULL DEFAULT false
+  const db = await pool.connect();
+  try {
+    await db.query('BEGIN');
+    await db.query('SELECT pg_advisory_xact_lock(782019, 0)');
+    await db.query(
+      'CREATE TABLE IF NOT EXISTS schema_migrations(version integer PRIMARY KEY, checksum text NOT NULL, applied_at timestamptz NOT NULL DEFAULT now())',
     );
-    CREATE TABLE IF NOT EXISTS plans (
-      id uuid PRIMARY KEY, scenario_id uuid NOT NULL, strategy text NOT NULL,
-      snapshot jsonb NOT NULL, solution jsonb NOT NULL, hash text NOT NULL,
-      status text NOT NULL CHECK(status IN ('proposed','approved','executing','uncertain','needs_replan','completed','superseded')),
-      reason text, created_at timestamptz NOT NULL DEFAULT now(), approved_at timestamptz
-    );
-    CREATE UNIQUE INDEX IF NOT EXISTS one_live_plan ON plans(scenario_id)
-      WHERE status IN ('approved','executing','uncertain');
-    CREATE TABLE IF NOT EXISTS approvals (
-      plan_id uuid PRIMARY KEY REFERENCES plans(id), plan_hash text NOT NULL,
-      actor text NOT NULL, approved_at timestamptz NOT NULL DEFAULT now()
-    );
-    CREATE TABLE IF NOT EXISTS actions (
-      id text PRIMARY KEY, plan_id uuid NOT NULL REFERENCES plans(id), ordinal integer NOT NULL,
-      allocation jsonb NOT NULL, stage text NOT NULL DEFAULT 'pending',
-      reservation jsonb, shipment jsonb, error text,
-      UNIQUE(plan_id,ordinal)
-    );
-    CREATE TABLE IF NOT EXISTS events (
-      seq bigserial PRIMARY KEY, scenario_id uuid NOT NULL, at timestamptz NOT NULL DEFAULT now(),
-      plan_id uuid REFERENCES plans(id), action_id text REFERENCES actions(id),
-      kind text NOT NULL, message text NOT NULL, data jsonb NOT NULL DEFAULT '{}'
-    );
-    CREATE INDEX IF NOT EXISTS events_scenario ON events(scenario_id, seq);
-  `);
+    const files = await migrations();
+    const newest = (await db.query('SELECT max(version) AS version FROM schema_migrations')).rows[0]
+      .version;
+    if (newest > files.at(-1)!.version)
+      throw new Error('Database belongs to a newer release; refusing a schema downgrade.');
+    for (const migration of files) {
+      const checksum = createHash('sha256').update(migration.sql).digest('hex');
+      const applied = (
+        await db.query('SELECT checksum FROM schema_migrations WHERE version=$1', [
+          migration.version,
+        ])
+      ).rows[0];
+      if (applied) {
+        if (applied.checksum !== checksum)
+          throw new Error(`Migration ${migration.version} changed after it was applied.`);
+        continue;
+      }
+      await db.query(migration.sql);
+      await db.query('INSERT INTO schema_migrations(version,checksum) VALUES($1,$2)', [
+        migration.version,
+        checksum,
+      ]);
+    }
+    await db.query('COMMIT');
+  } catch (error) {
+    await db.query('ROLLBACK');
+    throw error;
+  } finally {
+    db.release();
+  }
 }
 
 // Held on one dedicated connection, also serializes independent app processes.
@@ -50,12 +101,17 @@ export async function migrate() {
 export async function withLock<T>(fn: (db: pg.PoolClient) => Promise<T>): Promise<T> {
   const db = await pool.connect();
   let locked = false;
+  let lockId: number | undefined;
   try {
-    locked = (await db.query('SELECT pg_try_advisory_lock(782019, 1) AS locked')).rows[0].locked;
+    lockId = (await db.query('SELECT lock_id FROM workspaces WHERE id=$1', [workspaceId()])).rows[0]
+      ?.lock_id;
+    if (lockId === undefined) throw new Conflict('Workspace is unavailable.');
+    locked = (await db.query('SELECT pg_try_advisory_lock(782019, $1) AS locked', [lockId])).rows[0]
+      .locked;
     if (!locked) throw new Conflict('Another operation is running. Refresh and retry.');
     return await fn(db);
   } finally {
-    if (locked) await db.query('SELECT pg_advisory_unlock(782019, 1)');
+    if (locked) await db.query('SELECT pg_advisory_unlock(782019, $1)', [lockId]);
     db.release();
   }
 }
@@ -73,8 +129,13 @@ export async function transaction<T>(db: pg.PoolClient, fn: () => Promise<T>): P
 export async function context(
   db: Connection = pool,
 ): Promise<{ scenario: Scenario; snapshot: Snapshot; createdAt: Date; crashNext: boolean }> {
-  const row = (await db.query('SELECT * FROM scenario_state WHERE singleton')).rows[0];
-  if (!row) throw new Unavailable('Scenario is starting. Retry in a moment.');
+  const row = (
+    await db.query('SELECT * FROM scenario_state WHERE workspace_id=$1', [workspaceId()])
+  ).rows[0];
+  if (!row)
+    throw new Unavailable(
+      'This workspace has no active operation. An administrator must import an operation first.',
+    );
   return {
     scenario: row.scenario,
     snapshot: row.snapshot,
@@ -95,10 +156,13 @@ function actionFromRow(row: pg.QueryResultRow): Action {
 }
 export async function getPlans(scenarioId: string, db: Connection = pool): Promise<Plan[]> {
   const [p, a] = await Promise.all([
-    db.query('SELECT * FROM plans WHERE scenario_id=$1 ORDER BY created_at DESC, id', [scenarioId]),
     db.query(
-      'SELECT a.* FROM actions a JOIN plans p ON p.id=a.plan_id WHERE p.scenario_id=$1 ORDER BY a.ordinal',
-      [scenarioId],
+      'SELECT * FROM plans WHERE scenario_id=$1 AND workspace_id=$2 ORDER BY created_at DESC, id',
+      [scenarioId, workspaceId()],
+    ),
+    db.query(
+      'SELECT a.* FROM actions a JOIN plans p ON p.id=a.plan_id WHERE p.scenario_id=$1 AND p.workspace_id=$2 ORDER BY a.ordinal',
+      [scenarioId, workspaceId()],
     ),
   ]);
   return p.rows.map((row) => ({
@@ -110,6 +174,7 @@ export async function getPlans(scenarioId: string, db: Connection = pool): Promi
     hash: row.hash,
     status: row.status,
     reason: row.reason,
+    cancelReason: row.cancel_reason,
     createdAt: row.created_at.toISOString(),
     approvedAt: row.approved_at?.toISOString() ?? null,
     actions: a.rows.filter((action) => action.plan_id === row.id).map(actionFromRow),
@@ -131,13 +196,16 @@ export async function audit(
   actionId: string | null = null,
 ) {
   await db.query(
-    'INSERT INTO events(scenario_id,kind,message,data,plan_id,action_id) VALUES($1,$2,$3,$4,$5,$6)',
-    [scenarioId, kind, message, data, planId, actionId],
+    'INSERT INTO events(scenario_id,kind,message,data,plan_id,action_id,workspace_id) VALUES($1,$2,$3,$4,$5,$6,$7)',
+    [scenarioId, kind, message, { ...data, actor: principal() }, planId, actionId, workspaceId()],
   );
 }
-export async function getEvents(scenarioId: string): Promise<AuditEvent[]> {
+export async function getEvents(scenarioId: string, db: Connection = pool): Promise<AuditEvent[]> {
   return (
-    await pool.query('SELECT * FROM events WHERE scenario_id=$1 ORDER BY seq', [scenarioId])
+    await db.query('SELECT * FROM events WHERE scenario_id=$1 AND workspace_id=$2 ORDER BY seq', [
+      scenarioId,
+      workspaceId(),
+    ])
   ).rows.map((row) => ({
     seq: Number(row.seq),
     at: row.at.toISOString(),

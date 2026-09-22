@@ -21,6 +21,9 @@ jobs:
       TEST_DATABASE_URL: postgres://replan:replan-ci@127.0.0.1:5432/replan_test
       TEST_INVENTORY_DATABASE_URL: postgres://replan:replan-ci@127.0.0.1:5432/replan_inventory_test
       TEST_CARRIER_DATABASE_URL: postgres://replan:replan-ci@127.0.0.1:5432/replan_carrier_test
+      TEST_AUTH_DATABASE_URL: postgres://replan:replan-ci@127.0.0.1:5432/replan_auth_test
+      TEST_PILOT_DATABASE_URL: postgres://replan:replan-ci@127.0.0.1:5432/replan_pilot_test
+      BACKUP_ADMIN_DATABASE_URL: postgres://replan:replan-ci@127.0.0.1:5432/replan_test
       PGPASSWORD: replan-ci
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -37,9 +40,12 @@ jobs:
       - run: uv run --frozen --project solver python -c 'from ortools.sat.python import cp_model'
       - run: createdb -h 127.0.0.1 -U replan replan_inventory_test
       - run: createdb -h 127.0.0.1 -U replan replan_carrier_test
+      - run: createdb -h 127.0.0.1 -U replan replan_auth_test
+      - run: createdb -h 127.0.0.1 -U replan replan_pilot_test
       - run: npm run build
       - run: npm run format:check
       - run: npm test
+      - run: npm run backup:drill
       - run: npm run test:solver
       - run: npm run evaluate
       - run: npm audit --audit-level=high
@@ -50,6 +56,26 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - run: docker compose up --build -d --wait
       - run: node scripts/smoke.mjs http://127.0.0.1:4310
+      - name: Validate private pilot deployment configuration
+        env:
+          APP_DOMAIN: pilot.example.com
+          APP_ORIGIN: https://pilot.example.com
+          ACME_EMAIL: ci@example.com
+          PILOT_ALLOWED_CIDRS: 192.0.2.1/32
+          DATABASE_URL: postgres://runtime:unused@database/replan
+          MIGRATION_DATABASE_URL: postgres://owner:unused@database/replan
+          INVENTORY_URL: http://inventory:4311
+          CARRIER_URL: http://carrier:4312
+          INVENTORY_DATABASE_URL: postgres://inventory:unused@database/inventory
+          CARRIER_DATABASE_URL: postgres://carrier:unused@database/carrier
+          PROVIDER_TOKEN: ci-only-placeholder-not-a-deployed-secret
+        run: |
+          docker compose -f compose.pilot.yaml --profile simulation config --quiet
+          docker run --rm -e APP_DOMAIN -e ACME_EMAIL -e PILOT_ALLOWED_CIDRS -v "$PWD/deploy/Caddyfile:/etc/caddy/Caddyfile:ro" caddy:2.11.4-alpine caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
+      - name: Verify solver in the read-only pilot container configuration
+        run: |
+          REPLAN_TEST_IMAGE=$(docker compose images -q replan)
+          docker run --rm --read-only --tmpfs /tmp -e UV_NO_SYNC=1 -e UV_CACHE_DIR=/tmp/uv -e PYTHONDONTWRITEBYTECODE=1 "$REPLAN_TEST_IMAGE" uv run --frozen --project solver python -c 'from ortools.sat.python import cp_model; m=cp_model.CpModel(); m.new_bool_var("ready"); assert cp_model.CpSolver().solve(m)==cp_model.OPTIMAL'
       - if: always()
         run: docker compose logs --tail=100
       - if: always()
