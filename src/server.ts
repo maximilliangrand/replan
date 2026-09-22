@@ -7,6 +7,7 @@ import type { AppState } from '../shared/contracts.js';
 import { config } from './config.js';
 import {
   audit,
+  type Connection,
   Conflict,
   context,
   getEvents,
@@ -116,9 +117,15 @@ app.setErrorHandler((error, req, reply) => {
           : 'Invalid request.',
   });
 });
-async function state(includeWorld = config.mode === 'demo'): Promise<AppState> {
-  const { scenario, snapshot } = await context();
-  const [plans, events] = await Promise.all([getPlans(scenario.id), getEvents(scenario.id)]);
+async function state(
+  includeWorld = config.mode === 'demo',
+  db: Connection = pool,
+): Promise<AppState> {
+  const { scenario, snapshot } = await context(db);
+  const [plans, events] = await Promise.all([
+    getPlans(scenario.id, db),
+    getEvents(scenario.id, db),
+  ]);
   let world: AppState['world'] = null;
   let serviceWarning: string | null = null;
   try {
@@ -234,10 +241,10 @@ app.post('/api/operations', async (req) => {
 });
 app.get('/api/audit', async (_req, reply) => {
   reply.header('content-disposition', 'attachment; filename="replan-evidence.json"');
-  return withLock(async () => ({
+  return withLock(async (db) => ({
     schemaVersion: 1,
     exportedAt: new Date().toISOString(),
-    ...(await state(true)),
+    ...(await state(true, db)),
   }));
 });
 app.post('/api/demo/reset', async (req) => {

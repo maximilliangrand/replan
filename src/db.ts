@@ -200,9 +200,9 @@ export async function audit(
     [scenarioId, kind, message, { ...data, actor: principal() }, planId, actionId, workspaceId()],
   );
 }
-export async function getEvents(scenarioId: string): Promise<AuditEvent[]> {
+export async function getEvents(scenarioId: string, db: Connection = pool): Promise<AuditEvent[]> {
   return (
-    await pool.query('SELECT * FROM events WHERE scenario_id=$1 AND workspace_id=$2 ORDER BY seq', [
+    await db.query('SELECT * FROM events WHERE scenario_id=$1 AND workspace_id=$2 ORDER BY seq', [
       scenarioId,
       workspaceId(),
     ])
