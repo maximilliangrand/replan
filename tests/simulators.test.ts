@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
+import { request as httpRequest } from 'node:http';
 import { Pool } from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createCarrier } from '../src/simulators/carrier.js';
@@ -397,14 +398,7 @@ describe('irreversible carrier simulator', () => {
       url: `/scenarios/${scenarioId}/fault`,
       payload: { fault: 'lost_response' },
     });
-    await expect(
-      fetch(`${carrierAddress}/shipments`, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(payload),
-        signal: AbortSignal.timeout(2_000),
-      }),
-    ).rejects.toThrow();
+    await expect(post(carrierAddress, '/shipments', payload, 2_000)).rejects.toThrow();
     await carrier.close();
     carrier = await createCarrier(carrierURL);
     carrierAddress = await carrier.listen({ host: '127.0.0.1', port: 0 });
@@ -466,12 +460,7 @@ describe('irreversible carrier simulator', () => {
         scenarioId,
       ]);
       // A slow carrier transaction remains live even if its client's request times out.
-      const dispatch = fetch(`${carrierAddress}/shipments`, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(payload),
-        signal: AbortSignal.timeout(300),
-      });
+      const dispatch = post(carrierAddress, '/shipments', payload, 300);
       await expect(dispatch).rejects.toThrow();
       expect(
         (await carrier.inject(`/shipments/${payload.key}?scenarioId=${scenarioId}`)).statusCode,
@@ -510,11 +499,35 @@ async function waitForKeyWaiters(pool: Pool, lockKey: string, count: number) {
 }
 
 function post(address: string, path: string, payload: unknown, timeout = 5_000) {
-  return fetch(address + path, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify(payload),
-    signal: AbortSignal.timeout(timeout),
+  // Own each fault-injection socket. Node 22's global fetch pool can open an
+  // unused replacement connection after an abort, delaying a later server.close.
+  // A non-pooled HTTP request still aborts the real client connection while the
+  // independent provider transaction remains live behind its database lock.
+  return new Promise<Response>((resolve, reject) => {
+    const request = httpRequest(
+      address + path,
+      {
+        method: 'POST',
+        agent: false,
+        headers: { 'content-type': 'application/json' },
+        signal: AbortSignal.timeout(timeout),
+      },
+      (response) => {
+        const chunks: Buffer[] = [];
+        response.on('data', (chunk: Buffer) => chunks.push(chunk));
+        response.on('error', reject);
+        response.on('end', () => {
+          resolve(
+            new Response(Buffer.concat(chunks), {
+              status: response.statusCode,
+              headers: { 'content-type': 'application/json' },
+            }),
+          );
+        });
+      },
+    );
+    request.on('error', reject);
+    request.end(JSON.stringify(payload));
   });
 }
 
