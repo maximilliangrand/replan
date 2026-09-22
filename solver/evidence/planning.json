@@ -1,0 +1,5073 @@
+{
+  "schemaVersion": 1,
+  "scenarioVersion": "1",
+  "generatedAt": "2026-09-22T17:21:06.180141+00:00",
+  "environment": {
+    "python": "3.13.12",
+    "ortools": "9.14.6206",
+    "platform": "macOS-26.6-arm64-arm-64bit-Mach-O"
+  },
+  "sourceSha256": {
+    "main.py": "01cdf0743adc41edc3be7dfdd22b699c519610f2adaef41842d378b730680f99",
+    "checks.py": "49d904faa3cf5a4f87a9f58a8fa7f44bdba2dca7de7995aaf226993d3f62f8e3",
+    "scenarios.py": "dd00036f28a9b1e9e4cec7100b2292a47a556e28f3a28b32145b00f89bbe012e",
+    "benchmark.py": "113d6eff47efe8ff3388d02f5e0325b7231a107b24b5842126f366995d169eca"
+  },
+  "scope": "Synthetic planning only. No recovery latency, production throughput, or real customer outcomes measured.",
+  "overall": {
+    "cases": 27,
+    "optimizedWins": 18,
+    "ties": 9,
+    "optimizedLosses": 0,
+    "greedy": {
+      "fulfilledPriority": 512,
+      "fulfilledOrders": 53,
+      "unfilledOrders": 57,
+      "transportCost": 1582,
+      "feasibilityViolations": 0,
+      "meanWallMs": 0.021,
+      "maxWallMs": 0.045,
+      "provenOptimal": 0
+    },
+    "optimized": {
+      "fulfilledPriority": 620,
+      "fulfilledOrders": 70,
+      "unfilledOrders": 40,
+      "transportCost": 1881,
+      "feasibilityViolations": 0,
+      "meanWallMs": 0.381,
+      "maxWallMs": 1.77,
+      "provenOptimal": 27
+    }
+  },
+  "bySplit": {
+    "development": {
+      "cases": 3,
+      "optimizedWins": 1,
+      "ties": 2,
+      "optimizedLosses": 0,
+      "greedy": {
+        "fulfilledPriority": 31,
+        "fulfilledOrders": 3,
+        "unfilledOrders": 3,
+        "transportCost": 15,
+        "feasibilityViolations": 0,
+        "meanWallMs": 0.023,
+        "maxWallMs": 0.032,
+        "provenOptimal": 0
+      },
+      "optimized": {
+        "fulfilledPriority": 41,
+        "fulfilledOrders": 4,
+        "unfilledOrders": 2,
+        "transportCost": 23,
+        "feasibilityViolations": 0,
+        "meanWallMs": 0.688,
+        "maxWallMs": 1.77,
+        "provenOptimal": 3
+      }
+    },
+    "holdout": {
+      "cases": 24,
+      "optimizedWins": 17,
+      "ties": 7,
+      "optimizedLosses": 0,
+      "greedy": {
+        "fulfilledPriority": 481,
+        "fulfilledOrders": 50,
+        "unfilledOrders": 54,
+        "transportCost": 1567,
+        "feasibilityViolations": 0,
+        "meanWallMs": 0.021,
+        "maxWallMs": 0.045,
+        "provenOptimal": 0
+      },
+      "optimized": {
+        "fulfilledPriority": 579,
+        "fulfilledOrders": 66,
+        "unfilledOrders": 38,
+        "transportCost": 1858,
+        "feasibilityViolations": 0,
+        "meanWallMs": 0.343,
+        "maxWallMs": 1.038,
+        "provenOptimal": 24
+      }
+    }
+  },
+  "byFamily": {
+    "flexible-source": {
+      "cases": 1,
+      "optimizedWins": 1,
+      "ties": 0,
+      "optimizedLosses": 0,
+      "greedy": {
+        "fulfilledPriority": 11,
+        "fulfilledOrders": 1,
+        "unfilledOrders": 1,
+        "transportCost": 5,
+        "feasibilityViolations": 0,
+        "meanWallMs": 0.032,
+        "maxWallMs": 0.032,
+        "provenOptimal": 0
+      },
+      "optimized": {
+        "fulfilledPriority": 21,
+        "fulfilledOrders": 2,
+        "unfilledOrders": 0,
+        "transportCost": 13,
+        "feasibilityViolations": 0,
+        "meanWallMs": 1.77,
+        "maxWallMs": 1.77,
+        "provenOptimal": 1
+      }
+    },
+    "abundant": {
+      "cases": 1,
+      "optimizedWins": 0,
+      "ties": 1,
+      "optimizedLosses": 0,
+      "greedy": {
+        "fulfilledPriority": 20,
+        "fulfilledOrders": 2,
+        "unfilledOrders": 0,
+        "transportCost": 10,
+        "feasibilityViolations": 0,
+        "meanWallMs": 0.022,
+        "maxWallMs": 0.022,
+        "provenOptimal": 0
+      },
+      "optimized": {
+        "fulfilledPriority": 20,
+        "fulfilledOrders": 2,
+        "unfilledOrders": 0,
+        "transportCost": 10,
+        "feasibilityViolations": 0,
+        "meanWallMs": 0.283,
+        "maxWallMs": 0.283,
+        "provenOptimal": 1
+      }
+    },
+    "unfulfillable": {
+      "cases": 1,
+      "optimizedWins": 0,
+      "ties": 1,
+      "optimizedLosses": 0,
+      "greedy": {
+        "fulfilledPriority": 0,
+        "fulfilledOrders": 0,
+        "unfilledOrders": 2,
+        "transportCost": 0,
+        "feasibilityViolations": 0,
+        "meanWallMs": 0.014,
+        "maxWallMs": 0.014,
+        "provenOptimal": 0
+      },
+      "optimized": {
+        "fulfilledPriority": 0,
+        "fulfilledOrders": 0,
+        "unfilledOrders": 2,
+        "transportCost": 0,
+        "feasibilityViolations": 0,
+        "meanWallMs": 0.01,
+        "maxWallMs": 0.01,
+        "provenOptimal": 1
+      }
+    },
+    "shared-lane-multiple-parts": {
+      "cases": 8,
+      "optimizedWins": 8,
+      "ties": 0,
+      "optimizedLosses": 0,
+      "greedy": {
+        "fulfilledPriority": 80,
+        "fulfilledOrders": 8,
+        "unfilledOrders": 8,
+        "transportCost": 130,
+        "feasibilityViolations": 0,
+        "meanWallMs": 0.014,
+        "maxWallMs": 0.019,
+        "provenOptimal": 0
+      },
+      "optimized": {
+        "fulfilledPriority": 152,
+        "fulfilledOrders": 16,
+        "unfilledOrders": 0,
+        "transportCost": 364,
+        "feasibilityViolations": 0,
+        "meanWallMs": 0.243,
+        "maxWallMs": 0.389,
+        "provenOptimal": 8
+      }
+    },
+    "indivisible-demand": {
+      "cases": 8,
+      "optimizedWins": 8,
+      "ties": 0,
+      "optimizedLosses": 0,
+      "greedy": {
+        "fulfilledPriority": 88,
+        "fulfilledOrders": 8,
+        "unfilledOrders": 16,
+        "transportCost": 520,
+        "feasibilityViolations": 0,
+        "meanWallMs": 0.013,
+        "maxWallMs": 0.022,
+        "provenOptimal": 0
+      },
+      "optimized": {
+        "fulfilledPriority": 112,
+        "fulfilledOrders": 16,
+        "unfilledOrders": 8,
+        "transportCost": 520,
+        "feasibilityViolations": 0,
+        "meanWallMs": 0.251,
+        "maxWallMs": 0.385,
+        "provenOptimal": 8
+      }
+    },
+    "sparse-network": {
+      "cases": 8,
+      "optimizedWins": 1,
+      "ties": 7,
+      "optimizedLosses": 0,
+      "greedy": {
+        "fulfilledPriority": 313,
+        "fulfilledOrders": 34,
+        "unfilledOrders": 30,
+        "transportCost": 917,
+        "feasibilityViolations": 0,
+        "meanWallMs": 0.034,
+        "maxWallMs": 0.045,
+        "provenOptimal": 0
+      },
+      "optimized": {
+        "fulfilledPriority": 315,
+        "fulfilledOrders": 34,
+        "unfilledOrders": 30,
+        "transportCost": 974,
+        "feasibilityViolations": 0,
+        "meanWallMs": 0.535,
+        "maxWallMs": 1.038,
+        "provenOptimal": 8
+      }
+    }
+  },
+  "cases": [
+    {
+      "id": "development-flexibility",
+      "split": "development",
+      "family": "flexible-source",
+      "orders": [
+        {
+          "id": "flexible",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 1,
+          "priority": 11,
+          "deadlineHours": 12
+        },
+        {
+          "id": "restricted",
+          "factory": "f2",
+          "part": "rotor",
+          "quantity": 1,
+          "priority": 10,
+          "deadlineHours": 12
+        }
+      ],
+      "stock": [
+        {
+          "warehouse": "near",
+          "part": "rotor",
+          "available": 1,
+          "version": 1
+        },
+        {
+          "warehouse": "far",
+          "part": "rotor",
+          "available": 1,
+          "version": 1
+        }
+      ],
+      "lanes": [
+        {
+          "id": "near-f1",
+          "warehouse": "near",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 5,
+          "hours": 4,
+          "capacity": 10
+        },
+        {
+          "id": "near-f2",
+          "warehouse": "near",
+          "factory": "f2",
+          "mode": "road",
+          "unitCost": 5,
+          "hours": 4,
+          "capacity": 10
+        },
+        {
+          "id": "far-f1",
+          "warehouse": "far",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 8,
+          "hours": 4,
+          "capacity": 10
+        }
+      ],
+      "results": {
+        "greedy": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "flexible",
+                "warehouse": "near",
+                "part": "rotor",
+                "quantity": 1,
+                "laneId": "near-f1",
+                "mode": "road",
+                "hours": 4,
+                "cost": 5,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [
+              "restricted"
+            ],
+            "totalCost": 5,
+            "fulfilledPriority": 11,
+            "solverStatus": "HEURISTIC",
+            "solveMs": 0.029,
+            "explanation": "Priority-first greedy: choose the cheapest feasible transfer for each order; no global optimality claim."
+          },
+          "wallMs": 0.032,
+          "violations": []
+        },
+        "optimized": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "flexible",
+                "warehouse": "far",
+                "part": "rotor",
+                "quantity": 1,
+                "laneId": "far-f1",
+                "mode": "road",
+                "hours": 4,
+                "cost": 8,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "restricted",
+                "warehouse": "near",
+                "part": "rotor",
+                "quantity": 1,
+                "laneId": "near-f2",
+                "mode": "road",
+                "hours": 4,
+                "cost": 5,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [],
+            "totalCost": 13,
+            "fulfilledPriority": 21,
+            "solverStatus": "OPTIMAL",
+            "solveMs": 1.767,
+            "explanation": "Maximum fulfilled priority, then minimum transport cost, proven for this snapshot and these constraints."
+          },
+          "wallMs": 1.77,
+          "violations": []
+        }
+      }
+    },
+    {
+      "id": "development-abundant",
+      "split": "development",
+      "family": "abundant",
+      "orders": [
+        {
+          "id": "o1",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 1,
+          "priority": 10,
+          "deadlineHours": 12
+        },
+        {
+          "id": "o2",
+          "factory": "f2",
+          "part": "rotor",
+          "quantity": 1,
+          "priority": 10,
+          "deadlineHours": 12
+        }
+      ],
+      "stock": [
+        {
+          "warehouse": "w1",
+          "part": "rotor",
+          "available": 10,
+          "version": 1
+        },
+        {
+          "warehouse": "w2",
+          "part": "rotor",
+          "available": 10,
+          "version": 1
+        }
+      ],
+      "lanes": [
+        {
+          "id": "w1-f1",
+          "warehouse": "w1",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 5,
+          "hours": 4,
+          "capacity": 10
+        },
+        {
+          "id": "w1-f2",
+          "warehouse": "w1",
+          "factory": "f2",
+          "mode": "road",
+          "unitCost": 5,
+          "hours": 4,
+          "capacity": 10
+        },
+        {
+          "id": "w2-f1",
+          "warehouse": "w2",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 8,
+          "hours": 4,
+          "capacity": 10
+        },
+        {
+          "id": "w2-f2",
+          "warehouse": "w2",
+          "factory": "f2",
+          "mode": "road",
+          "unitCost": 8,
+          "hours": 4,
+          "capacity": 10
+        }
+      ],
+      "results": {
+        "greedy": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "o1",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 1,
+                "laneId": "w1-f1",
+                "mode": "road",
+                "hours": 4,
+                "cost": 5,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o2",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 1,
+                "laneId": "w1-f2",
+                "mode": "road",
+                "hours": 4,
+                "cost": 5,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [],
+            "totalCost": 10,
+            "fulfilledPriority": 20,
+            "solverStatus": "HEURISTIC",
+            "solveMs": 0.02,
+            "explanation": "Priority-first greedy: choose the cheapest feasible transfer for each order; no global optimality claim."
+          },
+          "wallMs": 0.022,
+          "violations": []
+        },
+        "optimized": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "o1",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 1,
+                "laneId": "w1-f1",
+                "mode": "road",
+                "hours": 4,
+                "cost": 5,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o2",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 1,
+                "laneId": "w1-f2",
+                "mode": "road",
+                "hours": 4,
+                "cost": 5,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [],
+            "totalCost": 10,
+            "fulfilledPriority": 20,
+            "solverStatus": "OPTIMAL",
+            "solveMs": 0.282,
+            "explanation": "Maximum fulfilled priority, then minimum transport cost, proven for this snapshot and these constraints."
+          },
+          "wallMs": 0.283,
+          "violations": []
+        }
+      }
+    },
+    {
+      "id": "development-no-feasible-route",
+      "split": "development",
+      "family": "unfulfillable",
+      "orders": [
+        {
+          "id": "o1",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 1,
+          "priority": 10,
+          "deadlineHours": 1
+        },
+        {
+          "id": "o2",
+          "factory": "f2",
+          "part": "rotor",
+          "quantity": 2,
+          "priority": 10,
+          "deadlineHours": 12
+        }
+      ],
+      "stock": [
+        {
+          "warehouse": "w1",
+          "part": "rotor",
+          "available": 1,
+          "version": 1
+        }
+      ],
+      "lanes": [
+        {
+          "id": "l1",
+          "warehouse": "w1",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 10,
+          "hours": 4,
+          "capacity": 10
+        },
+        {
+          "id": "l2",
+          "warehouse": "w1",
+          "factory": "f2",
+          "mode": "road",
+          "unitCost": 10,
+          "hours": 4,
+          "capacity": 10
+        }
+      ],
+      "results": {
+        "greedy": {
+          "solution": {
+            "allocations": [],
+            "unfilled": [
+              "o1",
+              "o2"
+            ],
+            "totalCost": 0,
+            "fulfilledPriority": 0,
+            "solverStatus": "HEURISTIC",
+            "solveMs": 0.013,
+            "explanation": "Priority-first greedy: choose the cheapest feasible transfer for each order; no global optimality claim."
+          },
+          "wallMs": 0.014,
+          "violations": []
+        },
+        "optimized": {
+          "solution": {
+            "allocations": [],
+            "unfilled": [
+              "o1",
+              "o2"
+            ],
+            "totalCost": 0,
+            "fulfilledPriority": 0,
+            "solverStatus": "OPTIMAL",
+            "solveMs": 0.009,
+            "explanation": "No full order has a feasible transfer."
+          },
+          "wallMs": 0.01,
+          "violations": []
+        }
+      }
+    },
+    {
+      "id": "holdout-shared-lane-0",
+      "split": "holdout",
+      "family": "shared-lane-multiple-parts",
+      "orders": [
+        {
+          "id": "rotor",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 5,
+          "priority": 10,
+          "deadlineHours": 12
+        },
+        {
+          "id": "bearing",
+          "factory": "f1",
+          "part": "bearing",
+          "quantity": 5,
+          "priority": 9,
+          "deadlineHours": 12
+        }
+      ],
+      "stock": [
+        {
+          "warehouse": "w1",
+          "part": "rotor",
+          "available": 5,
+          "version": 1
+        },
+        {
+          "warehouse": "w1",
+          "part": "bearing",
+          "available": 5,
+          "version": 1
+        },
+        {
+          "warehouse": "w2",
+          "part": "rotor",
+          "available": 5,
+          "version": 1
+        }
+      ],
+      "lanes": [
+        {
+          "id": "shared",
+          "warehouse": "w1",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 5,
+          "hours": 4,
+          "capacity": 5
+        },
+        {
+          "id": "alternate",
+          "warehouse": "w2",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 9,
+          "hours": 4,
+          "capacity": 5
+        }
+      ],
+      "results": {
+        "greedy": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "rotor",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 5,
+                "laneId": "shared",
+                "mode": "road",
+                "hours": 4,
+                "cost": 25,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [
+              "bearing"
+            ],
+            "totalCost": 25,
+            "fulfilledPriority": 10,
+            "solverStatus": "HEURISTIC",
+            "solveMs": 0.012,
+            "explanation": "Priority-first greedy: choose the cheapest feasible transfer for each order; no global optimality claim."
+          },
+          "wallMs": 0.012,
+          "violations": []
+        },
+        "optimized": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "rotor",
+                "warehouse": "w2",
+                "part": "rotor",
+                "quantity": 5,
+                "laneId": "alternate",
+                "mode": "road",
+                "hours": 4,
+                "cost": 45,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "bearing",
+                "warehouse": "w1",
+                "part": "bearing",
+                "quantity": 5,
+                "laneId": "shared",
+                "mode": "road",
+                "hours": 4,
+                "cost": 25,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [],
+            "totalCost": 70,
+            "fulfilledPriority": 19,
+            "solverStatus": "OPTIMAL",
+            "solveMs": 0.24,
+            "explanation": "Maximum fulfilled priority, then minimum transport cost, proven for this snapshot and these constraints."
+          },
+          "wallMs": 0.241,
+          "violations": []
+        }
+      }
+    },
+    {
+      "id": "holdout-packing-0",
+      "split": "holdout",
+      "family": "indivisible-demand",
+      "orders": [
+        {
+          "id": "large",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 10,
+          "priority": 11,
+          "deadlineHours": 12
+        },
+        {
+          "id": "small-a",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 5,
+          "priority": 7,
+          "deadlineHours": 12
+        },
+        {
+          "id": "small-b",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 5,
+          "priority": 7,
+          "deadlineHours": 12
+        }
+      ],
+      "stock": [
+        {
+          "warehouse": "w1",
+          "part": "rotor",
+          "available": 10,
+          "version": 1
+        }
+      ],
+      "lanes": [
+        {
+          "id": "l1",
+          "warehouse": "w1",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 10,
+          "hours": 4,
+          "capacity": 10
+        }
+      ],
+      "results": {
+        "greedy": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "large",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 10,
+                "laneId": "l1",
+                "mode": "road",
+                "hours": 4,
+                "cost": 100,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [
+              "small-a",
+              "small-b"
+            ],
+            "totalCost": 100,
+            "fulfilledPriority": 11,
+            "solverStatus": "HEURISTIC",
+            "solveMs": 0.012,
+            "explanation": "Priority-first greedy: choose the cheapest feasible transfer for each order; no global optimality claim."
+          },
+          "wallMs": 0.013,
+          "violations": []
+        },
+        "optimized": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "small-a",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 5,
+                "laneId": "l1",
+                "mode": "road",
+                "hours": 4,
+                "cost": 50,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "small-b",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 5,
+                "laneId": "l1",
+                "mode": "road",
+                "hours": 4,
+                "cost": 50,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [
+              "large"
+            ],
+            "totalCost": 100,
+            "fulfilledPriority": 14,
+            "solverStatus": "OPTIMAL",
+            "solveMs": 0.246,
+            "explanation": "Maximum fulfilled priority, then minimum transport cost, proven for this snapshot and these constraints."
+          },
+          "wallMs": 0.247,
+          "violations": []
+        }
+      }
+    },
+    {
+      "id": "holdout-sparse-0",
+      "split": "holdout",
+      "family": "sparse-network",
+      "orders": [
+        {
+          "id": "o0",
+          "factory": "f2",
+          "part": "rotor",
+          "quantity": 3,
+          "priority": 9,
+          "deadlineHours": 6
+        },
+        {
+          "id": "o1",
+          "factory": "f2",
+          "part": "bearing",
+          "quantity": 4,
+          "priority": 6,
+          "deadlineHours": 12
+        },
+        {
+          "id": "o2",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 3,
+          "priority": 3,
+          "deadlineHours": 2
+        },
+        {
+          "id": "o3",
+          "factory": "f3",
+          "part": "bearing",
+          "quantity": 2,
+          "priority": 5,
+          "deadlineHours": 2
+        },
+        {
+          "id": "o4",
+          "factory": "f3",
+          "part": "rotor",
+          "quantity": 3,
+          "priority": 8,
+          "deadlineHours": 12
+        },
+        {
+          "id": "o5",
+          "factory": "f1",
+          "part": "bearing",
+          "quantity": 4,
+          "priority": 6,
+          "deadlineHours": 12
+        },
+        {
+          "id": "o6",
+          "factory": "f3",
+          "part": "rotor",
+          "quantity": 4,
+          "priority": 8,
+          "deadlineHours": 12
+        },
+        {
+          "id": "o7",
+          "factory": "f2",
+          "part": "rotor",
+          "quantity": 1,
+          "priority": 2,
+          "deadlineHours": 12
+        }
+      ],
+      "stock": [
+        {
+          "warehouse": "w1",
+          "part": "rotor",
+          "available": 6,
+          "version": 1
+        },
+        {
+          "warehouse": "w1",
+          "part": "bearing",
+          "available": 0,
+          "version": 1
+        },
+        {
+          "warehouse": "w2",
+          "part": "rotor",
+          "available": 7,
+          "version": 1
+        },
+        {
+          "warehouse": "w2",
+          "part": "bearing",
+          "available": 5,
+          "version": 1
+        },
+        {
+          "warehouse": "w3",
+          "part": "rotor",
+          "available": 3,
+          "version": 1
+        },
+        {
+          "warehouse": "w3",
+          "part": "bearing",
+          "available": 5,
+          "version": 1
+        }
+      ],
+      "lanes": [
+        {
+          "id": "w1-f1",
+          "warehouse": "w1",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 4,
+          "hours": 3,
+          "capacity": 4
+        },
+        {
+          "id": "w1-f2",
+          "warehouse": "w1",
+          "factory": "f2",
+          "mode": "road",
+          "unitCost": 6,
+          "hours": 10,
+          "capacity": 8
+        },
+        {
+          "id": "w2-f1",
+          "warehouse": "w2",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 18,
+          "hours": 5,
+          "capacity": 2
+        },
+        {
+          "id": "w2-f2",
+          "warehouse": "w2",
+          "factory": "f2",
+          "mode": "road",
+          "unitCost": 11,
+          "hours": 10,
+          "capacity": 2
+        },
+        {
+          "id": "w2-f3",
+          "warehouse": "w2",
+          "factory": "f3",
+          "mode": "road",
+          "unitCost": 19,
+          "hours": 3,
+          "capacity": 5
+        },
+        {
+          "id": "w3-f1",
+          "warehouse": "w3",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 21,
+          "hours": 5,
+          "capacity": 6
+        },
+        {
+          "id": "w3-f2",
+          "warehouse": "w3",
+          "factory": "f2",
+          "mode": "road",
+          "unitCost": 11,
+          "hours": 3,
+          "capacity": 4
+        },
+        {
+          "id": "w3-f3",
+          "warehouse": "w3",
+          "factory": "f3",
+          "mode": "road",
+          "unitCost": 3,
+          "hours": 10,
+          "capacity": 5
+        }
+      ],
+      "results": {
+        "greedy": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "o0",
+                "warehouse": "w3",
+                "part": "rotor",
+                "quantity": 3,
+                "laneId": "w3-f2",
+                "mode": "road",
+                "hours": 3,
+                "cost": 33,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o4",
+                "warehouse": "w2",
+                "part": "rotor",
+                "quantity": 3,
+                "laneId": "w2-f3",
+                "mode": "road",
+                "hours": 3,
+                "cost": 57,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o5",
+                "warehouse": "w3",
+                "part": "bearing",
+                "quantity": 4,
+                "laneId": "w3-f1",
+                "mode": "road",
+                "hours": 5,
+                "cost": 84,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o7",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 1,
+                "laneId": "w1-f2",
+                "mode": "road",
+                "hours": 10,
+                "cost": 6,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [
+              "o1",
+              "o2",
+              "o3",
+              "o6"
+            ],
+            "totalCost": 180,
+            "fulfilledPriority": 25,
+            "solverStatus": "HEURISTIC",
+            "solveMs": 0.035,
+            "explanation": "Priority-first greedy: choose the cheapest feasible transfer for each order; no global optimality claim."
+          },
+          "wallMs": 0.036,
+          "violations": []
+        },
+        "optimized": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "o0",
+                "warehouse": "w3",
+                "part": "rotor",
+                "quantity": 3,
+                "laneId": "w3-f2",
+                "mode": "road",
+                "hours": 3,
+                "cost": 33,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o4",
+                "warehouse": "w2",
+                "part": "rotor",
+                "quantity": 3,
+                "laneId": "w2-f3",
+                "mode": "road",
+                "hours": 3,
+                "cost": 57,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o5",
+                "warehouse": "w3",
+                "part": "bearing",
+                "quantity": 4,
+                "laneId": "w3-f1",
+                "mode": "road",
+                "hours": 5,
+                "cost": 84,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o7",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 1,
+                "laneId": "w1-f2",
+                "mode": "road",
+                "hours": 10,
+                "cost": 6,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [
+              "o1",
+              "o2",
+              "o3",
+              "o6"
+            ],
+            "totalCost": 180,
+            "fulfilledPriority": 25,
+            "solverStatus": "OPTIMAL",
+            "solveMs": 0.576,
+            "explanation": "Maximum fulfilled priority, then minimum transport cost, proven for this snapshot and these constraints."
+          },
+          "wallMs": 0.577,
+          "violations": []
+        }
+      }
+    },
+    {
+      "id": "holdout-shared-lane-1",
+      "split": "holdout",
+      "family": "shared-lane-multiple-parts",
+      "orders": [
+        {
+          "id": "rotor",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 3,
+          "priority": 10,
+          "deadlineHours": 12
+        },
+        {
+          "id": "bearing",
+          "factory": "f1",
+          "part": "bearing",
+          "quantity": 3,
+          "priority": 9,
+          "deadlineHours": 12
+        }
+      ],
+      "stock": [
+        {
+          "warehouse": "w1",
+          "part": "rotor",
+          "available": 3,
+          "version": 1
+        },
+        {
+          "warehouse": "w1",
+          "part": "bearing",
+          "available": 3,
+          "version": 1
+        },
+        {
+          "warehouse": "w2",
+          "part": "rotor",
+          "available": 3,
+          "version": 1
+        }
+      ],
+      "lanes": [
+        {
+          "id": "shared",
+          "warehouse": "w1",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 5,
+          "hours": 4,
+          "capacity": 3
+        },
+        {
+          "id": "alternate",
+          "warehouse": "w2",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 9,
+          "hours": 4,
+          "capacity": 3
+        }
+      ],
+      "results": {
+        "greedy": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "rotor",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 3,
+                "laneId": "shared",
+                "mode": "road",
+                "hours": 4,
+                "cost": 15,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [
+              "bearing"
+            ],
+            "totalCost": 15,
+            "fulfilledPriority": 10,
+            "solverStatus": "HEURISTIC",
+            "solveMs": 0.016,
+            "explanation": "Priority-first greedy: choose the cheapest feasible transfer for each order; no global optimality claim."
+          },
+          "wallMs": 0.017,
+          "violations": []
+        },
+        "optimized": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "rotor",
+                "warehouse": "w2",
+                "part": "rotor",
+                "quantity": 3,
+                "laneId": "alternate",
+                "mode": "road",
+                "hours": 4,
+                "cost": 27,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "bearing",
+                "warehouse": "w1",
+                "part": "bearing",
+                "quantity": 3,
+                "laneId": "shared",
+                "mode": "road",
+                "hours": 4,
+                "cost": 15,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [],
+            "totalCost": 42,
+            "fulfilledPriority": 19,
+            "solverStatus": "OPTIMAL",
+            "solveMs": 0.241,
+            "explanation": "Maximum fulfilled priority, then minimum transport cost, proven for this snapshot and these constraints."
+          },
+          "wallMs": 0.242,
+          "violations": []
+        }
+      }
+    },
+    {
+      "id": "holdout-packing-1",
+      "split": "holdout",
+      "family": "indivisible-demand",
+      "orders": [
+        {
+          "id": "large",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 6,
+          "priority": 11,
+          "deadlineHours": 12
+        },
+        {
+          "id": "small-a",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 3,
+          "priority": 7,
+          "deadlineHours": 12
+        },
+        {
+          "id": "small-b",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 3,
+          "priority": 7,
+          "deadlineHours": 12
+        }
+      ],
+      "stock": [
+        {
+          "warehouse": "w1",
+          "part": "rotor",
+          "available": 6,
+          "version": 1
+        }
+      ],
+      "lanes": [
+        {
+          "id": "l1",
+          "warehouse": "w1",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 10,
+          "hours": 4,
+          "capacity": 6
+        }
+      ],
+      "results": {
+        "greedy": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "large",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 6,
+                "laneId": "l1",
+                "mode": "road",
+                "hours": 4,
+                "cost": 60,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [
+              "small-a",
+              "small-b"
+            ],
+            "totalCost": 60,
+            "fulfilledPriority": 11,
+            "solverStatus": "HEURISTIC",
+            "solveMs": 0.011,
+            "explanation": "Priority-first greedy: choose the cheapest feasible transfer for each order; no global optimality claim."
+          },
+          "wallMs": 0.012,
+          "violations": []
+        },
+        "optimized": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "small-a",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 3,
+                "laneId": "l1",
+                "mode": "road",
+                "hours": 4,
+                "cost": 30,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "small-b",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 3,
+                "laneId": "l1",
+                "mode": "road",
+                "hours": 4,
+                "cost": 30,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [
+              "large"
+            ],
+            "totalCost": 60,
+            "fulfilledPriority": 14,
+            "solverStatus": "OPTIMAL",
+            "solveMs": 0.322,
+            "explanation": "Maximum fulfilled priority, then minimum transport cost, proven for this snapshot and these constraints."
+          },
+          "wallMs": 0.324,
+          "violations": []
+        }
+      }
+    },
+    {
+      "id": "holdout-sparse-1",
+      "split": "holdout",
+      "family": "sparse-network",
+      "orders": [
+        {
+          "id": "o0",
+          "factory": "f3",
+          "part": "rotor",
+          "quantity": 3,
+          "priority": 2,
+          "deadlineHours": 6
+        },
+        {
+          "id": "o1",
+          "factory": "f2",
+          "part": "bearing",
+          "quantity": 4,
+          "priority": 13,
+          "deadlineHours": 2
+        },
+        {
+          "id": "o2",
+          "factory": "f1",
+          "part": "bearing",
+          "quantity": 1,
+          "priority": 15,
+          "deadlineHours": 6
+        },
+        {
+          "id": "o3",
+          "factory": "f2",
+          "part": "rotor",
+          "quantity": 4,
+          "priority": 5,
+          "deadlineHours": 12
+        },
+        {
+          "id": "o4",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 3,
+          "priority": 1,
+          "deadlineHours": 2
+        },
+        {
+          "id": "o5",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 4,
+          "priority": 11,
+          "deadlineHours": 2
+        },
+        {
+          "id": "o6",
+          "factory": "f2",
+          "part": "rotor",
+          "quantity": 2,
+          "priority": 13,
+          "deadlineHours": 6
+        },
+        {
+          "id": "o7",
+          "factory": "f2",
+          "part": "rotor",
+          "quantity": 3,
+          "priority": 4,
+          "deadlineHours": 12
+        }
+      ],
+      "stock": [
+        {
+          "warehouse": "w1",
+          "part": "rotor",
+          "available": 3,
+          "version": 1
+        },
+        {
+          "warehouse": "w1",
+          "part": "bearing",
+          "available": 7,
+          "version": 1
+        },
+        {
+          "warehouse": "w2",
+          "part": "rotor",
+          "available": 4,
+          "version": 1
+        },
+        {
+          "warehouse": "w2",
+          "part": "bearing",
+          "available": 0,
+          "version": 1
+        },
+        {
+          "warehouse": "w3",
+          "part": "rotor",
+          "available": 6,
+          "version": 1
+        },
+        {
+          "warehouse": "w3",
+          "part": "bearing",
+          "available": 8,
+          "version": 1
+        }
+      ],
+      "lanes": [
+        {
+          "id": "w1-f1",
+          "warehouse": "w1",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 5,
+          "hours": 3,
+          "capacity": 5
+        },
+        {
+          "id": "w1-f3",
+          "warehouse": "w1",
+          "factory": "f3",
+          "mode": "road",
+          "unitCost": 25,
+          "hours": 10,
+          "capacity": 7
+        },
+        {
+          "id": "w2-f1",
+          "warehouse": "w2",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 23,
+          "hours": 3,
+          "capacity": 5
+        },
+        {
+          "id": "w2-f2",
+          "warehouse": "w2",
+          "factory": "f2",
+          "mode": "road",
+          "unitCost": 17,
+          "hours": 10,
+          "capacity": 7
+        },
+        {
+          "id": "w2-f3",
+          "warehouse": "w2",
+          "factory": "f3",
+          "mode": "road",
+          "unitCost": 3,
+          "hours": 5,
+          "capacity": 4
+        },
+        {
+          "id": "w3-f1",
+          "warehouse": "w3",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 14,
+          "hours": 5,
+          "capacity": 3
+        },
+        {
+          "id": "w3-f2",
+          "warehouse": "w3",
+          "factory": "f2",
+          "mode": "road",
+          "unitCost": 24,
+          "hours": 10,
+          "capacity": 6
+        }
+      ],
+      "results": {
+        "greedy": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "o2",
+                "warehouse": "w1",
+                "part": "bearing",
+                "quantity": 1,
+                "laneId": "w1-f1",
+                "mode": "road",
+                "hours": 3,
+                "cost": 5,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o3",
+                "warehouse": "w2",
+                "part": "rotor",
+                "quantity": 4,
+                "laneId": "w2-f2",
+                "mode": "road",
+                "hours": 10,
+                "cost": 68,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o7",
+                "warehouse": "w3",
+                "part": "rotor",
+                "quantity": 3,
+                "laneId": "w3-f2",
+                "mode": "road",
+                "hours": 10,
+                "cost": 72,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [
+              "o0",
+              "o1",
+              "o4",
+              "o5",
+              "o6"
+            ],
+            "totalCost": 145,
+            "fulfilledPriority": 24,
+            "solverStatus": "HEURISTIC",
+            "solveMs": 0.036,
+            "explanation": "Priority-first greedy: choose the cheapest feasible transfer for each order; no global optimality claim."
+          },
+          "wallMs": 0.045,
+          "violations": []
+        },
+        "optimized": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "o2",
+                "warehouse": "w1",
+                "part": "bearing",
+                "quantity": 1,
+                "laneId": "w1-f1",
+                "mode": "road",
+                "hours": 3,
+                "cost": 5,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o3",
+                "warehouse": "w2",
+                "part": "rotor",
+                "quantity": 4,
+                "laneId": "w2-f2",
+                "mode": "road",
+                "hours": 10,
+                "cost": 68,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o7",
+                "warehouse": "w3",
+                "part": "rotor",
+                "quantity": 3,
+                "laneId": "w3-f2",
+                "mode": "road",
+                "hours": 10,
+                "cost": 72,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [
+              "o0",
+              "o1",
+              "o4",
+              "o5",
+              "o6"
+            ],
+            "totalCost": 145,
+            "fulfilledPriority": 24,
+            "solverStatus": "OPTIMAL",
+            "solveMs": 0.621,
+            "explanation": "Maximum fulfilled priority, then minimum transport cost, proven for this snapshot and these constraints."
+          },
+          "wallMs": 0.622,
+          "violations": []
+        }
+      }
+    },
+    {
+      "id": "holdout-shared-lane-2",
+      "split": "holdout",
+      "family": "shared-lane-multiple-parts",
+      "orders": [
+        {
+          "id": "rotor",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 2,
+          "priority": 10,
+          "deadlineHours": 12
+        },
+        {
+          "id": "bearing",
+          "factory": "f1",
+          "part": "bearing",
+          "quantity": 2,
+          "priority": 9,
+          "deadlineHours": 12
+        }
+      ],
+      "stock": [
+        {
+          "warehouse": "w1",
+          "part": "rotor",
+          "available": 2,
+          "version": 1
+        },
+        {
+          "warehouse": "w1",
+          "part": "bearing",
+          "available": 2,
+          "version": 1
+        },
+        {
+          "warehouse": "w2",
+          "part": "rotor",
+          "available": 2,
+          "version": 1
+        }
+      ],
+      "lanes": [
+        {
+          "id": "shared",
+          "warehouse": "w1",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 5,
+          "hours": 4,
+          "capacity": 2
+        },
+        {
+          "id": "alternate",
+          "warehouse": "w2",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 9,
+          "hours": 4,
+          "capacity": 2
+        }
+      ],
+      "results": {
+        "greedy": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "rotor",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 2,
+                "laneId": "shared",
+                "mode": "road",
+                "hours": 4,
+                "cost": 10,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [
+              "bearing"
+            ],
+            "totalCost": 10,
+            "fulfilledPriority": 10,
+            "solverStatus": "HEURISTIC",
+            "solveMs": 0.014,
+            "explanation": "Priority-first greedy: choose the cheapest feasible transfer for each order; no global optimality claim."
+          },
+          "wallMs": 0.015,
+          "violations": []
+        },
+        "optimized": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "rotor",
+                "warehouse": "w2",
+                "part": "rotor",
+                "quantity": 2,
+                "laneId": "alternate",
+                "mode": "road",
+                "hours": 4,
+                "cost": 18,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "bearing",
+                "warehouse": "w1",
+                "part": "bearing",
+                "quantity": 2,
+                "laneId": "shared",
+                "mode": "road",
+                "hours": 4,
+                "cost": 10,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [],
+            "totalCost": 28,
+            "fulfilledPriority": 19,
+            "solverStatus": "OPTIMAL",
+            "solveMs": 0.231,
+            "explanation": "Maximum fulfilled priority, then minimum transport cost, proven for this snapshot and these constraints."
+          },
+          "wallMs": 0.232,
+          "violations": []
+        }
+      }
+    },
+    {
+      "id": "holdout-packing-2",
+      "split": "holdout",
+      "family": "indivisible-demand",
+      "orders": [
+        {
+          "id": "large",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 4,
+          "priority": 11,
+          "deadlineHours": 12
+        },
+        {
+          "id": "small-a",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 2,
+          "priority": 7,
+          "deadlineHours": 12
+        },
+        {
+          "id": "small-b",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 2,
+          "priority": 7,
+          "deadlineHours": 12
+        }
+      ],
+      "stock": [
+        {
+          "warehouse": "w1",
+          "part": "rotor",
+          "available": 4,
+          "version": 1
+        }
+      ],
+      "lanes": [
+        {
+          "id": "l1",
+          "warehouse": "w1",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 10,
+          "hours": 4,
+          "capacity": 4
+        }
+      ],
+      "results": {
+        "greedy": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "large",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 4,
+                "laneId": "l1",
+                "mode": "road",
+                "hours": 4,
+                "cost": 40,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [
+              "small-a",
+              "small-b"
+            ],
+            "totalCost": 40,
+            "fulfilledPriority": 11,
+            "solverStatus": "HEURISTIC",
+            "solveMs": 0.013,
+            "explanation": "Priority-first greedy: choose the cheapest feasible transfer for each order; no global optimality claim."
+          },
+          "wallMs": 0.014,
+          "violations": []
+        },
+        "optimized": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "small-a",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 2,
+                "laneId": "l1",
+                "mode": "road",
+                "hours": 4,
+                "cost": 20,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "small-b",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 2,
+                "laneId": "l1",
+                "mode": "road",
+                "hours": 4,
+                "cost": 20,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [
+              "large"
+            ],
+            "totalCost": 40,
+            "fulfilledPriority": 14,
+            "solverStatus": "OPTIMAL",
+            "solveMs": 0.214,
+            "explanation": "Maximum fulfilled priority, then minimum transport cost, proven for this snapshot and these constraints."
+          },
+          "wallMs": 0.215,
+          "violations": []
+        }
+      }
+    },
+    {
+      "id": "holdout-sparse-2",
+      "split": "holdout",
+      "family": "sparse-network",
+      "orders": [
+        {
+          "id": "o0",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 3,
+          "priority": 14,
+          "deadlineHours": 2
+        },
+        {
+          "id": "o1",
+          "factory": "f3",
+          "part": "bearing",
+          "quantity": 3,
+          "priority": 10,
+          "deadlineHours": 2
+        },
+        {
+          "id": "o2",
+          "factory": "f3",
+          "part": "rotor",
+          "quantity": 2,
+          "priority": 7,
+          "deadlineHours": 12
+        },
+        {
+          "id": "o3",
+          "factory": "f2",
+          "part": "bearing",
+          "quantity": 4,
+          "priority": 9,
+          "deadlineHours": 6
+        },
+        {
+          "id": "o4",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 3,
+          "priority": 8,
+          "deadlineHours": 6
+        },
+        {
+          "id": "o5",
+          "factory": "f2",
+          "part": "bearing",
+          "quantity": 2,
+          "priority": 9,
+          "deadlineHours": 2
+        },
+        {
+          "id": "o6",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 1,
+          "priority": 3,
+          "deadlineHours": 6
+        },
+        {
+          "id": "o7",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 3,
+          "priority": 9,
+          "deadlineHours": 12
+        }
+      ],
+      "stock": [
+        {
+          "warehouse": "w1",
+          "part": "rotor",
+          "available": 8,
+          "version": 1
+        },
+        {
+          "warehouse": "w1",
+          "part": "bearing",
+          "available": 2,
+          "version": 1
+        },
+        {
+          "warehouse": "w2",
+          "part": "rotor",
+          "available": 7,
+          "version": 1
+        },
+        {
+          "warehouse": "w2",
+          "part": "bearing",
+          "available": 6,
+          "version": 1
+        },
+        {
+          "warehouse": "w3",
+          "part": "rotor",
+          "available": 8,
+          "version": 1
+        },
+        {
+          "warehouse": "w3",
+          "part": "bearing",
+          "available": 5,
+          "version": 1
+        }
+      ],
+      "lanes": [
+        {
+          "id": "w1-f1",
+          "warehouse": "w1",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 13,
+          "hours": 5,
+          "capacity": 8
+        },
+        {
+          "id": "w1-f3",
+          "warehouse": "w1",
+          "factory": "f3",
+          "mode": "road",
+          "unitCost": 24,
+          "hours": 10,
+          "capacity": 8
+        },
+        {
+          "id": "w2-f1",
+          "warehouse": "w2",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 9,
+          "hours": 5,
+          "capacity": 5
+        },
+        {
+          "id": "w2-f2",
+          "warehouse": "w2",
+          "factory": "f2",
+          "mode": "road",
+          "unitCost": 18,
+          "hours": 10,
+          "capacity": 6
+        },
+        {
+          "id": "w2-f3",
+          "warehouse": "w2",
+          "factory": "f3",
+          "mode": "road",
+          "unitCost": 16,
+          "hours": 5,
+          "capacity": 6
+        },
+        {
+          "id": "w3-f1",
+          "warehouse": "w3",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 19,
+          "hours": 10,
+          "capacity": 8
+        },
+        {
+          "id": "w3-f2",
+          "warehouse": "w3",
+          "factory": "f2",
+          "mode": "road",
+          "unitCost": 9,
+          "hours": 5,
+          "capacity": 3
+        },
+        {
+          "id": "w3-f3",
+          "warehouse": "w3",
+          "factory": "f3",
+          "mode": "road",
+          "unitCost": 21,
+          "hours": 5,
+          "capacity": 8
+        }
+      ],
+      "results": {
+        "greedy": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "o7",
+                "warehouse": "w2",
+                "part": "rotor",
+                "quantity": 3,
+                "laneId": "w2-f1",
+                "mode": "road",
+                "hours": 5,
+                "cost": 27,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o4",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 3,
+                "laneId": "w1-f1",
+                "mode": "road",
+                "hours": 5,
+                "cost": 39,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o2",
+                "warehouse": "w2",
+                "part": "rotor",
+                "quantity": 2,
+                "laneId": "w2-f3",
+                "mode": "road",
+                "hours": 5,
+                "cost": 32,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o6",
+                "warehouse": "w2",
+                "part": "rotor",
+                "quantity": 1,
+                "laneId": "w2-f1",
+                "mode": "road",
+                "hours": 5,
+                "cost": 9,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [
+              "o0",
+              "o1",
+              "o3",
+              "o5"
+            ],
+            "totalCost": 107,
+            "fulfilledPriority": 27,
+            "solverStatus": "HEURISTIC",
+            "solveMs": 0.032,
+            "explanation": "Priority-first greedy: choose the cheapest feasible transfer for each order; no global optimality claim."
+          },
+          "wallMs": 0.032,
+          "violations": []
+        },
+        "optimized": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "o7",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 3,
+                "laneId": "w1-f1",
+                "mode": "road",
+                "hours": 5,
+                "cost": 39,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o4",
+                "warehouse": "w2",
+                "part": "rotor",
+                "quantity": 3,
+                "laneId": "w2-f1",
+                "mode": "road",
+                "hours": 5,
+                "cost": 27,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o2",
+                "warehouse": "w2",
+                "part": "rotor",
+                "quantity": 2,
+                "laneId": "w2-f3",
+                "mode": "road",
+                "hours": 5,
+                "cost": 32,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o6",
+                "warehouse": "w2",
+                "part": "rotor",
+                "quantity": 1,
+                "laneId": "w2-f1",
+                "mode": "road",
+                "hours": 5,
+                "cost": 9,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [
+              "o0",
+              "o1",
+              "o3",
+              "o5"
+            ],
+            "totalCost": 107,
+            "fulfilledPriority": 27,
+            "solverStatus": "OPTIMAL",
+            "solveMs": 0.652,
+            "explanation": "Maximum fulfilled priority, then minimum transport cost, proven for this snapshot and these constraints."
+          },
+          "wallMs": 0.654,
+          "violations": []
+        }
+      }
+    },
+    {
+      "id": "holdout-shared-lane-3",
+      "split": "holdout",
+      "family": "shared-lane-multiple-parts",
+      "orders": [
+        {
+          "id": "rotor",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 3,
+          "priority": 10,
+          "deadlineHours": 12
+        },
+        {
+          "id": "bearing",
+          "factory": "f1",
+          "part": "bearing",
+          "quantity": 3,
+          "priority": 9,
+          "deadlineHours": 12
+        }
+      ],
+      "stock": [
+        {
+          "warehouse": "w1",
+          "part": "rotor",
+          "available": 3,
+          "version": 1
+        },
+        {
+          "warehouse": "w1",
+          "part": "bearing",
+          "available": 3,
+          "version": 1
+        },
+        {
+          "warehouse": "w2",
+          "part": "rotor",
+          "available": 3,
+          "version": 1
+        }
+      ],
+      "lanes": [
+        {
+          "id": "shared",
+          "warehouse": "w1",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 5,
+          "hours": 4,
+          "capacity": 3
+        },
+        {
+          "id": "alternate",
+          "warehouse": "w2",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 9,
+          "hours": 4,
+          "capacity": 3
+        }
+      ],
+      "results": {
+        "greedy": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "rotor",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 3,
+                "laneId": "shared",
+                "mode": "road",
+                "hours": 4,
+                "cost": 15,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [
+              "bearing"
+            ],
+            "totalCost": 15,
+            "fulfilledPriority": 10,
+            "solverStatus": "HEURISTIC",
+            "solveMs": 0.018,
+            "explanation": "Priority-first greedy: choose the cheapest feasible transfer for each order; no global optimality claim."
+          },
+          "wallMs": 0.019,
+          "violations": []
+        },
+        "optimized": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "rotor",
+                "warehouse": "w2",
+                "part": "rotor",
+                "quantity": 3,
+                "laneId": "alternate",
+                "mode": "road",
+                "hours": 4,
+                "cost": 27,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "bearing",
+                "warehouse": "w1",
+                "part": "bearing",
+                "quantity": 3,
+                "laneId": "shared",
+                "mode": "road",
+                "hours": 4,
+                "cost": 15,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [],
+            "totalCost": 42,
+            "fulfilledPriority": 19,
+            "solverStatus": "OPTIMAL",
+            "solveMs": 0.386,
+            "explanation": "Maximum fulfilled priority, then minimum transport cost, proven for this snapshot and these constraints."
+          },
+          "wallMs": 0.389,
+          "violations": []
+        }
+      }
+    },
+    {
+      "id": "holdout-packing-3",
+      "split": "holdout",
+      "family": "indivisible-demand",
+      "orders": [
+        {
+          "id": "large",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 6,
+          "priority": 11,
+          "deadlineHours": 12
+        },
+        {
+          "id": "small-a",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 3,
+          "priority": 7,
+          "deadlineHours": 12
+        },
+        {
+          "id": "small-b",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 3,
+          "priority": 7,
+          "deadlineHours": 12
+        }
+      ],
+      "stock": [
+        {
+          "warehouse": "w1",
+          "part": "rotor",
+          "available": 6,
+          "version": 1
+        }
+      ],
+      "lanes": [
+        {
+          "id": "l1",
+          "warehouse": "w1",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 10,
+          "hours": 4,
+          "capacity": 6
+        }
+      ],
+      "results": {
+        "greedy": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "large",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 6,
+                "laneId": "l1",
+                "mode": "road",
+                "hours": 4,
+                "cost": 60,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [
+              "small-a",
+              "small-b"
+            ],
+            "totalCost": 60,
+            "fulfilledPriority": 11,
+            "solverStatus": "HEURISTIC",
+            "solveMs": 0.021,
+            "explanation": "Priority-first greedy: choose the cheapest feasible transfer for each order; no global optimality claim."
+          },
+          "wallMs": 0.022,
+          "violations": []
+        },
+        "optimized": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "small-a",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 3,
+                "laneId": "l1",
+                "mode": "road",
+                "hours": 4,
+                "cost": 30,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "small-b",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 3,
+                "laneId": "l1",
+                "mode": "road",
+                "hours": 4,
+                "cost": 30,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [
+              "large"
+            ],
+            "totalCost": 60,
+            "fulfilledPriority": 14,
+            "solverStatus": "OPTIMAL",
+            "solveMs": 0.383,
+            "explanation": "Maximum fulfilled priority, then minimum transport cost, proven for this snapshot and these constraints."
+          },
+          "wallMs": 0.385,
+          "violations": []
+        }
+      }
+    },
+    {
+      "id": "holdout-sparse-3",
+      "split": "holdout",
+      "family": "sparse-network",
+      "orders": [
+        {
+          "id": "o0",
+          "factory": "f3",
+          "part": "rotor",
+          "quantity": 3,
+          "priority": 15,
+          "deadlineHours": 12
+        },
+        {
+          "id": "o1",
+          "factory": "f2",
+          "part": "rotor",
+          "quantity": 1,
+          "priority": 15,
+          "deadlineHours": 6
+        },
+        {
+          "id": "o2",
+          "factory": "f2",
+          "part": "rotor",
+          "quantity": 2,
+          "priority": 12,
+          "deadlineHours": 6
+        },
+        {
+          "id": "o3",
+          "factory": "f3",
+          "part": "bearing",
+          "quantity": 4,
+          "priority": 11,
+          "deadlineHours": 2
+        },
+        {
+          "id": "o4",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 4,
+          "priority": 12,
+          "deadlineHours": 2
+        },
+        {
+          "id": "o5",
+          "factory": "f3",
+          "part": "rotor",
+          "quantity": 2,
+          "priority": 13,
+          "deadlineHours": 12
+        },
+        {
+          "id": "o6",
+          "factory": "f1",
+          "part": "bearing",
+          "quantity": 1,
+          "priority": 14,
+          "deadlineHours": 6
+        },
+        {
+          "id": "o7",
+          "factory": "f2",
+          "part": "bearing",
+          "quantity": 4,
+          "priority": 7,
+          "deadlineHours": 12
+        }
+      ],
+      "stock": [
+        {
+          "warehouse": "w1",
+          "part": "rotor",
+          "available": 7,
+          "version": 1
+        },
+        {
+          "warehouse": "w1",
+          "part": "bearing",
+          "available": 2,
+          "version": 1
+        },
+        {
+          "warehouse": "w2",
+          "part": "rotor",
+          "available": 5,
+          "version": 1
+        },
+        {
+          "warehouse": "w2",
+          "part": "bearing",
+          "available": 1,
+          "version": 1
+        },
+        {
+          "warehouse": "w3",
+          "part": "rotor",
+          "available": 0,
+          "version": 1
+        },
+        {
+          "warehouse": "w3",
+          "part": "bearing",
+          "available": 2,
+          "version": 1
+        }
+      ],
+      "lanes": [
+        {
+          "id": "w1-f1",
+          "warehouse": "w1",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 10,
+          "hours": 10,
+          "capacity": 7
+        },
+        {
+          "id": "w1-f2",
+          "warehouse": "w1",
+          "factory": "f2",
+          "mode": "road",
+          "unitCost": 11,
+          "hours": 5,
+          "capacity": 7
+        },
+        {
+          "id": "w1-f3",
+          "warehouse": "w1",
+          "factory": "f3",
+          "mode": "road",
+          "unitCost": 19,
+          "hours": 10,
+          "capacity": 7
+        },
+        {
+          "id": "w2-f1",
+          "warehouse": "w2",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 12,
+          "hours": 10,
+          "capacity": 1
+        },
+        {
+          "id": "w2-f2",
+          "warehouse": "w2",
+          "factory": "f2",
+          "mode": "road",
+          "unitCost": 21,
+          "hours": 10,
+          "capacity": 3
+        },
+        {
+          "id": "w2-f3",
+          "warehouse": "w2",
+          "factory": "f3",
+          "mode": "road",
+          "unitCost": 12,
+          "hours": 10,
+          "capacity": 2
+        },
+        {
+          "id": "w3-f1",
+          "warehouse": "w3",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 8,
+          "hours": 10,
+          "capacity": 5
+        },
+        {
+          "id": "w3-f2",
+          "warehouse": "w3",
+          "factory": "f2",
+          "mode": "road",
+          "unitCost": 4,
+          "hours": 5,
+          "capacity": 8
+        }
+      ],
+      "results": {
+        "greedy": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "o1",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 1,
+                "laneId": "w1-f2",
+                "mode": "road",
+                "hours": 5,
+                "cost": 11,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o0",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 3,
+                "laneId": "w1-f3",
+                "mode": "road",
+                "hours": 10,
+                "cost": 57,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o5",
+                "warehouse": "w2",
+                "part": "rotor",
+                "quantity": 2,
+                "laneId": "w2-f3",
+                "mode": "road",
+                "hours": 10,
+                "cost": 24,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o2",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 2,
+                "laneId": "w1-f2",
+                "mode": "road",
+                "hours": 5,
+                "cost": 22,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [
+              "o3",
+              "o4",
+              "o6",
+              "o7"
+            ],
+            "totalCost": 114,
+            "fulfilledPriority": 55,
+            "solverStatus": "HEURISTIC",
+            "solveMs": 0.035,
+            "explanation": "Priority-first greedy: choose the cheapest feasible transfer for each order; no global optimality claim."
+          },
+          "wallMs": 0.036,
+          "violations": []
+        },
+        "optimized": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "o1",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 1,
+                "laneId": "w1-f2",
+                "mode": "road",
+                "hours": 5,
+                "cost": 11,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o0",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 3,
+                "laneId": "w1-f3",
+                "mode": "road",
+                "hours": 10,
+                "cost": 57,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o5",
+                "warehouse": "w2",
+                "part": "rotor",
+                "quantity": 2,
+                "laneId": "w2-f3",
+                "mode": "road",
+                "hours": 10,
+                "cost": 24,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o2",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 2,
+                "laneId": "w1-f2",
+                "mode": "road",
+                "hours": 5,
+                "cost": 22,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [
+              "o3",
+              "o4",
+              "o6",
+              "o7"
+            ],
+            "totalCost": 114,
+            "fulfilledPriority": 55,
+            "solverStatus": "OPTIMAL",
+            "solveMs": 0.329,
+            "explanation": "Maximum fulfilled priority, then minimum transport cost, proven for this snapshot and these constraints."
+          },
+          "wallMs": 0.33,
+          "violations": []
+        }
+      }
+    },
+    {
+      "id": "holdout-shared-lane-4",
+      "split": "holdout",
+      "family": "shared-lane-multiple-parts",
+      "orders": [
+        {
+          "id": "rotor",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 3,
+          "priority": 10,
+          "deadlineHours": 12
+        },
+        {
+          "id": "bearing",
+          "factory": "f1",
+          "part": "bearing",
+          "quantity": 3,
+          "priority": 9,
+          "deadlineHours": 12
+        }
+      ],
+      "stock": [
+        {
+          "warehouse": "w1",
+          "part": "rotor",
+          "available": 3,
+          "version": 1
+        },
+        {
+          "warehouse": "w1",
+          "part": "bearing",
+          "available": 3,
+          "version": 1
+        },
+        {
+          "warehouse": "w2",
+          "part": "rotor",
+          "available": 3,
+          "version": 1
+        }
+      ],
+      "lanes": [
+        {
+          "id": "shared",
+          "warehouse": "w1",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 5,
+          "hours": 4,
+          "capacity": 3
+        },
+        {
+          "id": "alternate",
+          "warehouse": "w2",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 9,
+          "hours": 4,
+          "capacity": 3
+        }
+      ],
+      "results": {
+        "greedy": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "rotor",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 3,
+                "laneId": "shared",
+                "mode": "road",
+                "hours": 4,
+                "cost": 15,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [
+              "bearing"
+            ],
+            "totalCost": 15,
+            "fulfilledPriority": 10,
+            "solverStatus": "HEURISTIC",
+            "solveMs": 0.015,
+            "explanation": "Priority-first greedy: choose the cheapest feasible transfer for each order; no global optimality claim."
+          },
+          "wallMs": 0.015,
+          "violations": []
+        },
+        "optimized": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "rotor",
+                "warehouse": "w2",
+                "part": "rotor",
+                "quantity": 3,
+                "laneId": "alternate",
+                "mode": "road",
+                "hours": 4,
+                "cost": 27,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "bearing",
+                "warehouse": "w1",
+                "part": "bearing",
+                "quantity": 3,
+                "laneId": "shared",
+                "mode": "road",
+                "hours": 4,
+                "cost": 15,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [],
+            "totalCost": 42,
+            "fulfilledPriority": 19,
+            "solverStatus": "OPTIMAL",
+            "solveMs": 0.217,
+            "explanation": "Maximum fulfilled priority, then minimum transport cost, proven for this snapshot and these constraints."
+          },
+          "wallMs": 0.218,
+          "violations": []
+        }
+      }
+    },
+    {
+      "id": "holdout-packing-4",
+      "split": "holdout",
+      "family": "indivisible-demand",
+      "orders": [
+        {
+          "id": "large",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 6,
+          "priority": 11,
+          "deadlineHours": 12
+        },
+        {
+          "id": "small-a",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 3,
+          "priority": 7,
+          "deadlineHours": 12
+        },
+        {
+          "id": "small-b",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 3,
+          "priority": 7,
+          "deadlineHours": 12
+        }
+      ],
+      "stock": [
+        {
+          "warehouse": "w1",
+          "part": "rotor",
+          "available": 6,
+          "version": 1
+        }
+      ],
+      "lanes": [
+        {
+          "id": "l1",
+          "warehouse": "w1",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 10,
+          "hours": 4,
+          "capacity": 6
+        }
+      ],
+      "results": {
+        "greedy": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "large",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 6,
+                "laneId": "l1",
+                "mode": "road",
+                "hours": 4,
+                "cost": 60,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [
+              "small-a",
+              "small-b"
+            ],
+            "totalCost": 60,
+            "fulfilledPriority": 11,
+            "solverStatus": "HEURISTIC",
+            "solveMs": 0.012,
+            "explanation": "Priority-first greedy: choose the cheapest feasible transfer for each order; no global optimality claim."
+          },
+          "wallMs": 0.012,
+          "violations": []
+        },
+        "optimized": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "small-a",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 3,
+                "laneId": "l1",
+                "mode": "road",
+                "hours": 4,
+                "cost": 30,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "small-b",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 3,
+                "laneId": "l1",
+                "mode": "road",
+                "hours": 4,
+                "cost": 30,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [
+              "large"
+            ],
+            "totalCost": 60,
+            "fulfilledPriority": 14,
+            "solverStatus": "OPTIMAL",
+            "solveMs": 0.225,
+            "explanation": "Maximum fulfilled priority, then minimum transport cost, proven for this snapshot and these constraints."
+          },
+          "wallMs": 0.225,
+          "violations": []
+        }
+      }
+    },
+    {
+      "id": "holdout-sparse-4",
+      "split": "holdout",
+      "family": "sparse-network",
+      "orders": [
+        {
+          "id": "o0",
+          "factory": "f2",
+          "part": "rotor",
+          "quantity": 4,
+          "priority": 8,
+          "deadlineHours": 2
+        },
+        {
+          "id": "o1",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 1,
+          "priority": 7,
+          "deadlineHours": 12
+        },
+        {
+          "id": "o2",
+          "factory": "f2",
+          "part": "rotor",
+          "quantity": 2,
+          "priority": 9,
+          "deadlineHours": 12
+        },
+        {
+          "id": "o3",
+          "factory": "f2",
+          "part": "bearing",
+          "quantity": 2,
+          "priority": 14,
+          "deadlineHours": 2
+        },
+        {
+          "id": "o4",
+          "factory": "f2",
+          "part": "rotor",
+          "quantity": 1,
+          "priority": 14,
+          "deadlineHours": 12
+        },
+        {
+          "id": "o5",
+          "factory": "f2",
+          "part": "bearing",
+          "quantity": 2,
+          "priority": 3,
+          "deadlineHours": 6
+        },
+        {
+          "id": "o6",
+          "factory": "f2",
+          "part": "bearing",
+          "quantity": 1,
+          "priority": 14,
+          "deadlineHours": 12
+        },
+        {
+          "id": "o7",
+          "factory": "f2",
+          "part": "bearing",
+          "quantity": 2,
+          "priority": 3,
+          "deadlineHours": 2
+        }
+      ],
+      "stock": [
+        {
+          "warehouse": "w1",
+          "part": "rotor",
+          "available": 7,
+          "version": 1
+        },
+        {
+          "warehouse": "w1",
+          "part": "bearing",
+          "available": 4,
+          "version": 1
+        },
+        {
+          "warehouse": "w2",
+          "part": "rotor",
+          "available": 1,
+          "version": 1
+        },
+        {
+          "warehouse": "w2",
+          "part": "bearing",
+          "available": 8,
+          "version": 1
+        },
+        {
+          "warehouse": "w3",
+          "part": "rotor",
+          "available": 4,
+          "version": 1
+        },
+        {
+          "warehouse": "w3",
+          "part": "bearing",
+          "available": 0,
+          "version": 1
+        }
+      ],
+      "lanes": [
+        {
+          "id": "w1-f1",
+          "warehouse": "w1",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 20,
+          "hours": 10,
+          "capacity": 5
+        },
+        {
+          "id": "w1-f2",
+          "warehouse": "w1",
+          "factory": "f2",
+          "mode": "road",
+          "unitCost": 18,
+          "hours": 3,
+          "capacity": 7
+        },
+        {
+          "id": "w1-f3",
+          "warehouse": "w1",
+          "factory": "f3",
+          "mode": "road",
+          "unitCost": 11,
+          "hours": 5,
+          "capacity": 8
+        },
+        {
+          "id": "w2-f2",
+          "warehouse": "w2",
+          "factory": "f2",
+          "mode": "road",
+          "unitCost": 3,
+          "hours": 3,
+          "capacity": 1
+        },
+        {
+          "id": "w2-f3",
+          "warehouse": "w2",
+          "factory": "f3",
+          "mode": "road",
+          "unitCost": 10,
+          "hours": 10,
+          "capacity": 8
+        },
+        {
+          "id": "w3-f1",
+          "warehouse": "w3",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 6,
+          "hours": 10,
+          "capacity": 4
+        },
+        {
+          "id": "w3-f3",
+          "warehouse": "w3",
+          "factory": "f3",
+          "mode": "road",
+          "unitCost": 22,
+          "hours": 10,
+          "capacity": 8
+        }
+      ],
+      "results": {
+        "greedy": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "o4",
+                "warehouse": "w2",
+                "part": "rotor",
+                "quantity": 1,
+                "laneId": "w2-f2",
+                "mode": "road",
+                "hours": 3,
+                "cost": 3,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o6",
+                "warehouse": "w1",
+                "part": "bearing",
+                "quantity": 1,
+                "laneId": "w1-f2",
+                "mode": "road",
+                "hours": 3,
+                "cost": 18,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o2",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 2,
+                "laneId": "w1-f2",
+                "mode": "road",
+                "hours": 3,
+                "cost": 36,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o1",
+                "warehouse": "w3",
+                "part": "rotor",
+                "quantity": 1,
+                "laneId": "w3-f1",
+                "mode": "road",
+                "hours": 10,
+                "cost": 6,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o5",
+                "warehouse": "w1",
+                "part": "bearing",
+                "quantity": 2,
+                "laneId": "w1-f2",
+                "mode": "road",
+                "hours": 3,
+                "cost": 36,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [
+              "o0",
+              "o3",
+              "o7"
+            ],
+            "totalCost": 99,
+            "fulfilledPriority": 47,
+            "solverStatus": "HEURISTIC",
+            "solveMs": 0.032,
+            "explanation": "Priority-first greedy: choose the cheapest feasible transfer for each order; no global optimality claim."
+          },
+          "wallMs": 0.033,
+          "violations": []
+        },
+        "optimized": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "o4",
+                "warehouse": "w2",
+                "part": "rotor",
+                "quantity": 1,
+                "laneId": "w2-f2",
+                "mode": "road",
+                "hours": 3,
+                "cost": 3,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o6",
+                "warehouse": "w1",
+                "part": "bearing",
+                "quantity": 1,
+                "laneId": "w1-f2",
+                "mode": "road",
+                "hours": 3,
+                "cost": 18,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o2",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 2,
+                "laneId": "w1-f2",
+                "mode": "road",
+                "hours": 3,
+                "cost": 36,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o1",
+                "warehouse": "w3",
+                "part": "rotor",
+                "quantity": 1,
+                "laneId": "w3-f1",
+                "mode": "road",
+                "hours": 10,
+                "cost": 6,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o5",
+                "warehouse": "w1",
+                "part": "bearing",
+                "quantity": 2,
+                "laneId": "w1-f2",
+                "mode": "road",
+                "hours": 3,
+                "cost": 36,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [
+              "o0",
+              "o3",
+              "o7"
+            ],
+            "totalCost": 99,
+            "fulfilledPriority": 47,
+            "solverStatus": "OPTIMAL",
+            "solveMs": 0.406,
+            "explanation": "Maximum fulfilled priority, then minimum transport cost, proven for this snapshot and these constraints."
+          },
+          "wallMs": 0.407,
+          "violations": []
+        }
+      }
+    },
+    {
+      "id": "holdout-shared-lane-5",
+      "split": "holdout",
+      "family": "shared-lane-multiple-parts",
+      "orders": [
+        {
+          "id": "rotor",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 4,
+          "priority": 10,
+          "deadlineHours": 12
+        },
+        {
+          "id": "bearing",
+          "factory": "f1",
+          "part": "bearing",
+          "quantity": 4,
+          "priority": 9,
+          "deadlineHours": 12
+        }
+      ],
+      "stock": [
+        {
+          "warehouse": "w1",
+          "part": "rotor",
+          "available": 4,
+          "version": 1
+        },
+        {
+          "warehouse": "w1",
+          "part": "bearing",
+          "available": 4,
+          "version": 1
+        },
+        {
+          "warehouse": "w2",
+          "part": "rotor",
+          "available": 4,
+          "version": 1
+        }
+      ],
+      "lanes": [
+        {
+          "id": "shared",
+          "warehouse": "w1",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 5,
+          "hours": 4,
+          "capacity": 4
+        },
+        {
+          "id": "alternate",
+          "warehouse": "w2",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 9,
+          "hours": 4,
+          "capacity": 4
+        }
+      ],
+      "results": {
+        "greedy": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "rotor",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 4,
+                "laneId": "shared",
+                "mode": "road",
+                "hours": 4,
+                "cost": 20,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [
+              "bearing"
+            ],
+            "totalCost": 20,
+            "fulfilledPriority": 10,
+            "solverStatus": "HEURISTIC",
+            "solveMs": 0.012,
+            "explanation": "Priority-first greedy: choose the cheapest feasible transfer for each order; no global optimality claim."
+          },
+          "wallMs": 0.013,
+          "violations": []
+        },
+        "optimized": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "rotor",
+                "warehouse": "w2",
+                "part": "rotor",
+                "quantity": 4,
+                "laneId": "alternate",
+                "mode": "road",
+                "hours": 4,
+                "cost": 36,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "bearing",
+                "warehouse": "w1",
+                "part": "bearing",
+                "quantity": 4,
+                "laneId": "shared",
+                "mode": "road",
+                "hours": 4,
+                "cost": 20,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [],
+            "totalCost": 56,
+            "fulfilledPriority": 19,
+            "solverStatus": "OPTIMAL",
+            "solveMs": 0.204,
+            "explanation": "Maximum fulfilled priority, then minimum transport cost, proven for this snapshot and these constraints."
+          },
+          "wallMs": 0.205,
+          "violations": []
+        }
+      }
+    },
+    {
+      "id": "holdout-packing-5",
+      "split": "holdout",
+      "family": "indivisible-demand",
+      "orders": [
+        {
+          "id": "large",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 8,
+          "priority": 11,
+          "deadlineHours": 12
+        },
+        {
+          "id": "small-a",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 4,
+          "priority": 7,
+          "deadlineHours": 12
+        },
+        {
+          "id": "small-b",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 4,
+          "priority": 7,
+          "deadlineHours": 12
+        }
+      ],
+      "stock": [
+        {
+          "warehouse": "w1",
+          "part": "rotor",
+          "available": 8,
+          "version": 1
+        }
+      ],
+      "lanes": [
+        {
+          "id": "l1",
+          "warehouse": "w1",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 10,
+          "hours": 4,
+          "capacity": 8
+        }
+      ],
+      "results": {
+        "greedy": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "large",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 8,
+                "laneId": "l1",
+                "mode": "road",
+                "hours": 4,
+                "cost": 80,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [
+              "small-a",
+              "small-b"
+            ],
+            "totalCost": 80,
+            "fulfilledPriority": 11,
+            "solverStatus": "HEURISTIC",
+            "solveMs": 0.01,
+            "explanation": "Priority-first greedy: choose the cheapest feasible transfer for each order; no global optimality claim."
+          },
+          "wallMs": 0.011,
+          "violations": []
+        },
+        "optimized": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "small-a",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 4,
+                "laneId": "l1",
+                "mode": "road",
+                "hours": 4,
+                "cost": 40,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "small-b",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 4,
+                "laneId": "l1",
+                "mode": "road",
+                "hours": 4,
+                "cost": 40,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [
+              "large"
+            ],
+            "totalCost": 80,
+            "fulfilledPriority": 14,
+            "solverStatus": "OPTIMAL",
+            "solveMs": 0.203,
+            "explanation": "Maximum fulfilled priority, then minimum transport cost, proven for this snapshot and these constraints."
+          },
+          "wallMs": 0.204,
+          "violations": []
+        }
+      }
+    },
+    {
+      "id": "holdout-sparse-5",
+      "split": "holdout",
+      "family": "sparse-network",
+      "orders": [
+        {
+          "id": "o0",
+          "factory": "f3",
+          "part": "bearing",
+          "quantity": 1,
+          "priority": 14,
+          "deadlineHours": 6
+        },
+        {
+          "id": "o1",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 2,
+          "priority": 2,
+          "deadlineHours": 6
+        },
+        {
+          "id": "o2",
+          "factory": "f2",
+          "part": "rotor",
+          "quantity": 4,
+          "priority": 9,
+          "deadlineHours": 2
+        },
+        {
+          "id": "o3",
+          "factory": "f3",
+          "part": "rotor",
+          "quantity": 1,
+          "priority": 12,
+          "deadlineHours": 2
+        },
+        {
+          "id": "o4",
+          "factory": "f2",
+          "part": "bearing",
+          "quantity": 2,
+          "priority": 15,
+          "deadlineHours": 6
+        },
+        {
+          "id": "o5",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 2,
+          "priority": 10,
+          "deadlineHours": 12
+        },
+        {
+          "id": "o6",
+          "factory": "f2",
+          "part": "rotor",
+          "quantity": 2,
+          "priority": 1,
+          "deadlineHours": 2
+        },
+        {
+          "id": "o7",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 2,
+          "priority": 14,
+          "deadlineHours": 2
+        }
+      ],
+      "stock": [
+        {
+          "warehouse": "w1",
+          "part": "rotor",
+          "available": 4,
+          "version": 1
+        },
+        {
+          "warehouse": "w1",
+          "part": "bearing",
+          "available": 5,
+          "version": 1
+        },
+        {
+          "warehouse": "w2",
+          "part": "rotor",
+          "available": 3,
+          "version": 1
+        },
+        {
+          "warehouse": "w2",
+          "part": "bearing",
+          "available": 8,
+          "version": 1
+        },
+        {
+          "warehouse": "w3",
+          "part": "rotor",
+          "available": 3,
+          "version": 1
+        },
+        {
+          "warehouse": "w3",
+          "part": "bearing",
+          "available": 2,
+          "version": 1
+        }
+      ],
+      "lanes": [
+        {
+          "id": "w1-f1",
+          "warehouse": "w1",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 24,
+          "hours": 3,
+          "capacity": 7
+        },
+        {
+          "id": "w1-f2",
+          "warehouse": "w1",
+          "factory": "f2",
+          "mode": "road",
+          "unitCost": 13,
+          "hours": 5,
+          "capacity": 3
+        },
+        {
+          "id": "w1-f3",
+          "warehouse": "w1",
+          "factory": "f3",
+          "mode": "road",
+          "unitCost": 10,
+          "hours": 3,
+          "capacity": 6
+        },
+        {
+          "id": "w2-f1",
+          "warehouse": "w2",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 21,
+          "hours": 10,
+          "capacity": 1
+        },
+        {
+          "id": "w2-f2",
+          "warehouse": "w2",
+          "factory": "f2",
+          "mode": "road",
+          "unitCost": 24,
+          "hours": 5,
+          "capacity": 2
+        },
+        {
+          "id": "w2-f3",
+          "warehouse": "w2",
+          "factory": "f3",
+          "mode": "road",
+          "unitCost": 11,
+          "hours": 5,
+          "capacity": 6
+        },
+        {
+          "id": "w3-f2",
+          "warehouse": "w3",
+          "factory": "f2",
+          "mode": "road",
+          "unitCost": 7,
+          "hours": 3,
+          "capacity": 5
+        },
+        {
+          "id": "w3-f3",
+          "warehouse": "w3",
+          "factory": "f3",
+          "mode": "road",
+          "unitCost": 2,
+          "hours": 10,
+          "capacity": 6
+        }
+      ],
+      "results": {
+        "greedy": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "o4",
+                "warehouse": "w3",
+                "part": "bearing",
+                "quantity": 2,
+                "laneId": "w3-f2",
+                "mode": "road",
+                "hours": 3,
+                "cost": 14,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o0",
+                "warehouse": "w1",
+                "part": "bearing",
+                "quantity": 1,
+                "laneId": "w1-f3",
+                "mode": "road",
+                "hours": 3,
+                "cost": 10,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o5",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 2,
+                "laneId": "w1-f1",
+                "mode": "road",
+                "hours": 3,
+                "cost": 48,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o1",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 2,
+                "laneId": "w1-f1",
+                "mode": "road",
+                "hours": 3,
+                "cost": 48,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [
+              "o2",
+              "o3",
+              "o6",
+              "o7"
+            ],
+            "totalCost": 120,
+            "fulfilledPriority": 41,
+            "solverStatus": "HEURISTIC",
+            "solveMs": 0.03,
+            "explanation": "Priority-first greedy: choose the cheapest feasible transfer for each order; no global optimality claim."
+          },
+          "wallMs": 0.031,
+          "violations": []
+        },
+        "optimized": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "o4",
+                "warehouse": "w3",
+                "part": "bearing",
+                "quantity": 2,
+                "laneId": "w3-f2",
+                "mode": "road",
+                "hours": 3,
+                "cost": 14,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o0",
+                "warehouse": "w1",
+                "part": "bearing",
+                "quantity": 1,
+                "laneId": "w1-f3",
+                "mode": "road",
+                "hours": 3,
+                "cost": 10,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o5",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 2,
+                "laneId": "w1-f1",
+                "mode": "road",
+                "hours": 3,
+                "cost": 48,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o1",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 2,
+                "laneId": "w1-f1",
+                "mode": "road",
+                "hours": 3,
+                "cost": 48,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [
+              "o2",
+              "o3",
+              "o6",
+              "o7"
+            ],
+            "totalCost": 120,
+            "fulfilledPriority": 41,
+            "solverStatus": "OPTIMAL",
+            "solveMs": 0.347,
+            "explanation": "Maximum fulfilled priority, then minimum transport cost, proven for this snapshot and these constraints."
+          },
+          "wallMs": 0.348,
+          "violations": []
+        }
+      }
+    },
+    {
+      "id": "holdout-shared-lane-6",
+      "split": "holdout",
+      "family": "shared-lane-multiple-parts",
+      "orders": [
+        {
+          "id": "rotor",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 2,
+          "priority": 10,
+          "deadlineHours": 12
+        },
+        {
+          "id": "bearing",
+          "factory": "f1",
+          "part": "bearing",
+          "quantity": 2,
+          "priority": 9,
+          "deadlineHours": 12
+        }
+      ],
+      "stock": [
+        {
+          "warehouse": "w1",
+          "part": "rotor",
+          "available": 2,
+          "version": 1
+        },
+        {
+          "warehouse": "w1",
+          "part": "bearing",
+          "available": 2,
+          "version": 1
+        },
+        {
+          "warehouse": "w2",
+          "part": "rotor",
+          "available": 2,
+          "version": 1
+        }
+      ],
+      "lanes": [
+        {
+          "id": "shared",
+          "warehouse": "w1",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 5,
+          "hours": 4,
+          "capacity": 2
+        },
+        {
+          "id": "alternate",
+          "warehouse": "w2",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 9,
+          "hours": 4,
+          "capacity": 2
+        }
+      ],
+      "results": {
+        "greedy": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "rotor",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 2,
+                "laneId": "shared",
+                "mode": "road",
+                "hours": 4,
+                "cost": 10,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [
+              "bearing"
+            ],
+            "totalCost": 10,
+            "fulfilledPriority": 10,
+            "solverStatus": "HEURISTIC",
+            "solveMs": 0.012,
+            "explanation": "Priority-first greedy: choose the cheapest feasible transfer for each order; no global optimality claim."
+          },
+          "wallMs": 0.013,
+          "violations": []
+        },
+        "optimized": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "rotor",
+                "warehouse": "w2",
+                "part": "rotor",
+                "quantity": 2,
+                "laneId": "alternate",
+                "mode": "road",
+                "hours": 4,
+                "cost": 18,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "bearing",
+                "warehouse": "w1",
+                "part": "bearing",
+                "quantity": 2,
+                "laneId": "shared",
+                "mode": "road",
+                "hours": 4,
+                "cost": 10,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [],
+            "totalCost": 28,
+            "fulfilledPriority": 19,
+            "solverStatus": "OPTIMAL",
+            "solveMs": 0.211,
+            "explanation": "Maximum fulfilled priority, then minimum transport cost, proven for this snapshot and these constraints."
+          },
+          "wallMs": 0.212,
+          "violations": []
+        }
+      }
+    },
+    {
+      "id": "holdout-packing-6",
+      "split": "holdout",
+      "family": "indivisible-demand",
+      "orders": [
+        {
+          "id": "large",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 4,
+          "priority": 11,
+          "deadlineHours": 12
+        },
+        {
+          "id": "small-a",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 2,
+          "priority": 7,
+          "deadlineHours": 12
+        },
+        {
+          "id": "small-b",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 2,
+          "priority": 7,
+          "deadlineHours": 12
+        }
+      ],
+      "stock": [
+        {
+          "warehouse": "w1",
+          "part": "rotor",
+          "available": 4,
+          "version": 1
+        }
+      ],
+      "lanes": [
+        {
+          "id": "l1",
+          "warehouse": "w1",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 10,
+          "hours": 4,
+          "capacity": 4
+        }
+      ],
+      "results": {
+        "greedy": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "large",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 4,
+                "laneId": "l1",
+                "mode": "road",
+                "hours": 4,
+                "cost": 40,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [
+              "small-a",
+              "small-b"
+            ],
+            "totalCost": 40,
+            "fulfilledPriority": 11,
+            "solverStatus": "HEURISTIC",
+            "solveMs": 0.011,
+            "explanation": "Priority-first greedy: choose the cheapest feasible transfer for each order; no global optimality claim."
+          },
+          "wallMs": 0.011,
+          "violations": []
+        },
+        "optimized": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "small-a",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 2,
+                "laneId": "l1",
+                "mode": "road",
+                "hours": 4,
+                "cost": 20,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "small-b",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 2,
+                "laneId": "l1",
+                "mode": "road",
+                "hours": 4,
+                "cost": 20,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [
+              "large"
+            ],
+            "totalCost": 40,
+            "fulfilledPriority": 14,
+            "solverStatus": "OPTIMAL",
+            "solveMs": 0.199,
+            "explanation": "Maximum fulfilled priority, then minimum transport cost, proven for this snapshot and these constraints."
+          },
+          "wallMs": 0.2,
+          "violations": []
+        }
+      }
+    },
+    {
+      "id": "holdout-sparse-6",
+      "split": "holdout",
+      "family": "sparse-network",
+      "orders": [
+        {
+          "id": "o0",
+          "factory": "f2",
+          "part": "bearing",
+          "quantity": 1,
+          "priority": 1,
+          "deadlineHours": 2
+        },
+        {
+          "id": "o1",
+          "factory": "f3",
+          "part": "bearing",
+          "quantity": 3,
+          "priority": 6,
+          "deadlineHours": 2
+        },
+        {
+          "id": "o2",
+          "factory": "f2",
+          "part": "bearing",
+          "quantity": 2,
+          "priority": 12,
+          "deadlineHours": 6
+        },
+        {
+          "id": "o3",
+          "factory": "f3",
+          "part": "rotor",
+          "quantity": 2,
+          "priority": 10,
+          "deadlineHours": 12
+        },
+        {
+          "id": "o4",
+          "factory": "f3",
+          "part": "bearing",
+          "quantity": 1,
+          "priority": 14,
+          "deadlineHours": 6
+        },
+        {
+          "id": "o5",
+          "factory": "f2",
+          "part": "rotor",
+          "quantity": 3,
+          "priority": 13,
+          "deadlineHours": 6
+        },
+        {
+          "id": "o6",
+          "factory": "f2",
+          "part": "bearing",
+          "quantity": 1,
+          "priority": 13,
+          "deadlineHours": 2
+        },
+        {
+          "id": "o7",
+          "factory": "f3",
+          "part": "bearing",
+          "quantity": 1,
+          "priority": 1,
+          "deadlineHours": 12
+        }
+      ],
+      "stock": [
+        {
+          "warehouse": "w1",
+          "part": "rotor",
+          "available": 3,
+          "version": 1
+        },
+        {
+          "warehouse": "w1",
+          "part": "bearing",
+          "available": 5,
+          "version": 1
+        },
+        {
+          "warehouse": "w2",
+          "part": "rotor",
+          "available": 7,
+          "version": 1
+        },
+        {
+          "warehouse": "w2",
+          "part": "bearing",
+          "available": 3,
+          "version": 1
+        },
+        {
+          "warehouse": "w3",
+          "part": "rotor",
+          "available": 8,
+          "version": 1
+        },
+        {
+          "warehouse": "w3",
+          "part": "bearing",
+          "available": 8,
+          "version": 1
+        }
+      ],
+      "lanes": [
+        {
+          "id": "w1-f1",
+          "warehouse": "w1",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 2,
+          "hours": 10,
+          "capacity": 6
+        },
+        {
+          "id": "w1-f2",
+          "warehouse": "w1",
+          "factory": "f2",
+          "mode": "road",
+          "unitCost": 15,
+          "hours": 5,
+          "capacity": 6
+        },
+        {
+          "id": "w1-f3",
+          "warehouse": "w1",
+          "factory": "f3",
+          "mode": "road",
+          "unitCost": 4,
+          "hours": 10,
+          "capacity": 4
+        },
+        {
+          "id": "w2-f2",
+          "warehouse": "w2",
+          "factory": "f2",
+          "mode": "road",
+          "unitCost": 11,
+          "hours": 10,
+          "capacity": 4
+        },
+        {
+          "id": "w2-f3",
+          "warehouse": "w2",
+          "factory": "f3",
+          "mode": "road",
+          "unitCost": 9,
+          "hours": 3,
+          "capacity": 4
+        },
+        {
+          "id": "w3-f1",
+          "warehouse": "w3",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 24,
+          "hours": 10,
+          "capacity": 1
+        }
+      ],
+      "results": {
+        "greedy": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "o4",
+                "warehouse": "w2",
+                "part": "bearing",
+                "quantity": 1,
+                "laneId": "w2-f3",
+                "mode": "road",
+                "hours": 3,
+                "cost": 9,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o5",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 3,
+                "laneId": "w1-f2",
+                "mode": "road",
+                "hours": 5,
+                "cost": 45,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o2",
+                "warehouse": "w1",
+                "part": "bearing",
+                "quantity": 2,
+                "laneId": "w1-f2",
+                "mode": "road",
+                "hours": 5,
+                "cost": 30,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o3",
+                "warehouse": "w2",
+                "part": "rotor",
+                "quantity": 2,
+                "laneId": "w2-f3",
+                "mode": "road",
+                "hours": 3,
+                "cost": 18,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o7",
+                "warehouse": "w1",
+                "part": "bearing",
+                "quantity": 1,
+                "laneId": "w1-f3",
+                "mode": "road",
+                "hours": 10,
+                "cost": 4,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [
+              "o0",
+              "o1",
+              "o6"
+            ],
+            "totalCost": 106,
+            "fulfilledPriority": 50,
+            "solverStatus": "HEURISTIC",
+            "solveMs": 0.028,
+            "explanation": "Priority-first greedy: choose the cheapest feasible transfer for each order; no global optimality claim."
+          },
+          "wallMs": 0.029,
+          "violations": []
+        },
+        "optimized": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "o4",
+                "warehouse": "w2",
+                "part": "bearing",
+                "quantity": 1,
+                "laneId": "w2-f3",
+                "mode": "road",
+                "hours": 3,
+                "cost": 9,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o5",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 3,
+                "laneId": "w1-f2",
+                "mode": "road",
+                "hours": 5,
+                "cost": 45,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o2",
+                "warehouse": "w1",
+                "part": "bearing",
+                "quantity": 2,
+                "laneId": "w1-f2",
+                "mode": "road",
+                "hours": 5,
+                "cost": 30,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o3",
+                "warehouse": "w2",
+                "part": "rotor",
+                "quantity": 2,
+                "laneId": "w2-f3",
+                "mode": "road",
+                "hours": 3,
+                "cost": 18,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o7",
+                "warehouse": "w1",
+                "part": "bearing",
+                "quantity": 1,
+                "laneId": "w1-f3",
+                "mode": "road",
+                "hours": 10,
+                "cost": 4,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [
+              "o0",
+              "o1",
+              "o6"
+            ],
+            "totalCost": 106,
+            "fulfilledPriority": 50,
+            "solverStatus": "OPTIMAL",
+            "solveMs": 0.305,
+            "explanation": "Maximum fulfilled priority, then minimum transport cost, proven for this snapshot and these constraints."
+          },
+          "wallMs": 0.306,
+          "violations": []
+        }
+      }
+    },
+    {
+      "id": "holdout-shared-lane-7",
+      "split": "holdout",
+      "family": "shared-lane-multiple-parts",
+      "orders": [
+        {
+          "id": "rotor",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 4,
+          "priority": 10,
+          "deadlineHours": 12
+        },
+        {
+          "id": "bearing",
+          "factory": "f1",
+          "part": "bearing",
+          "quantity": 4,
+          "priority": 9,
+          "deadlineHours": 12
+        }
+      ],
+      "stock": [
+        {
+          "warehouse": "w1",
+          "part": "rotor",
+          "available": 4,
+          "version": 1
+        },
+        {
+          "warehouse": "w1",
+          "part": "bearing",
+          "available": 4,
+          "version": 1
+        },
+        {
+          "warehouse": "w2",
+          "part": "rotor",
+          "available": 4,
+          "version": 1
+        }
+      ],
+      "lanes": [
+        {
+          "id": "shared",
+          "warehouse": "w1",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 5,
+          "hours": 4,
+          "capacity": 4
+        },
+        {
+          "id": "alternate",
+          "warehouse": "w2",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 9,
+          "hours": 4,
+          "capacity": 4
+        }
+      ],
+      "results": {
+        "greedy": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "rotor",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 4,
+                "laneId": "shared",
+                "mode": "road",
+                "hours": 4,
+                "cost": 20,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [
+              "bearing"
+            ],
+            "totalCost": 20,
+            "fulfilledPriority": 10,
+            "solverStatus": "HEURISTIC",
+            "solveMs": 0.011,
+            "explanation": "Priority-first greedy: choose the cheapest feasible transfer for each order; no global optimality claim."
+          },
+          "wallMs": 0.011,
+          "violations": []
+        },
+        "optimized": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "rotor",
+                "warehouse": "w2",
+                "part": "rotor",
+                "quantity": 4,
+                "laneId": "alternate",
+                "mode": "road",
+                "hours": 4,
+                "cost": 36,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "bearing",
+                "warehouse": "w1",
+                "part": "bearing",
+                "quantity": 4,
+                "laneId": "shared",
+                "mode": "road",
+                "hours": 4,
+                "cost": 20,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [],
+            "totalCost": 56,
+            "fulfilledPriority": 19,
+            "solverStatus": "OPTIMAL",
+            "solveMs": 0.203,
+            "explanation": "Maximum fulfilled priority, then minimum transport cost, proven for this snapshot and these constraints."
+          },
+          "wallMs": 0.204,
+          "violations": []
+        }
+      }
+    },
+    {
+      "id": "holdout-packing-7",
+      "split": "holdout",
+      "family": "indivisible-demand",
+      "orders": [
+        {
+          "id": "large",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 8,
+          "priority": 11,
+          "deadlineHours": 12
+        },
+        {
+          "id": "small-a",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 4,
+          "priority": 7,
+          "deadlineHours": 12
+        },
+        {
+          "id": "small-b",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 4,
+          "priority": 7,
+          "deadlineHours": 12
+        }
+      ],
+      "stock": [
+        {
+          "warehouse": "w1",
+          "part": "rotor",
+          "available": 8,
+          "version": 1
+        }
+      ],
+      "lanes": [
+        {
+          "id": "l1",
+          "warehouse": "w1",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 10,
+          "hours": 4,
+          "capacity": 8
+        }
+      ],
+      "results": {
+        "greedy": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "large",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 8,
+                "laneId": "l1",
+                "mode": "road",
+                "hours": 4,
+                "cost": 80,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [
+              "small-a",
+              "small-b"
+            ],
+            "totalCost": 80,
+            "fulfilledPriority": 11,
+            "solverStatus": "HEURISTIC",
+            "solveMs": 0.011,
+            "explanation": "Priority-first greedy: choose the cheapest feasible transfer for each order; no global optimality claim."
+          },
+          "wallMs": 0.012,
+          "violations": []
+        },
+        "optimized": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "small-a",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 4,
+                "laneId": "l1",
+                "mode": "road",
+                "hours": 4,
+                "cost": 40,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "small-b",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 4,
+                "laneId": "l1",
+                "mode": "road",
+                "hours": 4,
+                "cost": 40,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [
+              "large"
+            ],
+            "totalCost": 80,
+            "fulfilledPriority": 14,
+            "solverStatus": "OPTIMAL",
+            "solveMs": 0.209,
+            "explanation": "Maximum fulfilled priority, then minimum transport cost, proven for this snapshot and these constraints."
+          },
+          "wallMs": 0.21,
+          "violations": []
+        }
+      }
+    },
+    {
+      "id": "holdout-sparse-7",
+      "split": "holdout",
+      "family": "sparse-network",
+      "orders": [
+        {
+          "id": "o0",
+          "factory": "f1",
+          "part": "bearing",
+          "quantity": 1,
+          "priority": 2,
+          "deadlineHours": 12
+        },
+        {
+          "id": "o1",
+          "factory": "f1",
+          "part": "bearing",
+          "quantity": 1,
+          "priority": 15,
+          "deadlineHours": 12
+        },
+        {
+          "id": "o2",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 1,
+          "priority": 7,
+          "deadlineHours": 6
+        },
+        {
+          "id": "o3",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 1,
+          "priority": 9,
+          "deadlineHours": 6
+        },
+        {
+          "id": "o4",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 2,
+          "priority": 11,
+          "deadlineHours": 12
+        },
+        {
+          "id": "o5",
+          "factory": "f3",
+          "part": "rotor",
+          "quantity": 4,
+          "priority": 1,
+          "deadlineHours": 2
+        },
+        {
+          "id": "o6",
+          "factory": "f1",
+          "part": "rotor",
+          "quantity": 3,
+          "priority": 7,
+          "deadlineHours": 2
+        },
+        {
+          "id": "o7",
+          "factory": "f3",
+          "part": "rotor",
+          "quantity": 3,
+          "priority": 9,
+          "deadlineHours": 12
+        }
+      ],
+      "stock": [
+        {
+          "warehouse": "w1",
+          "part": "rotor",
+          "available": 2,
+          "version": 1
+        },
+        {
+          "warehouse": "w1",
+          "part": "bearing",
+          "available": 1,
+          "version": 1
+        },
+        {
+          "warehouse": "w2",
+          "part": "rotor",
+          "available": 3,
+          "version": 1
+        },
+        {
+          "warehouse": "w2",
+          "part": "bearing",
+          "available": 5,
+          "version": 1
+        },
+        {
+          "warehouse": "w3",
+          "part": "rotor",
+          "available": 1,
+          "version": 1
+        },
+        {
+          "warehouse": "w3",
+          "part": "bearing",
+          "available": 8,
+          "version": 1
+        }
+      ],
+      "lanes": [
+        {
+          "id": "w1-f1",
+          "warehouse": "w1",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 20,
+          "hours": 3,
+          "capacity": 4
+        },
+        {
+          "id": "w1-f2",
+          "warehouse": "w1",
+          "factory": "f2",
+          "mode": "road",
+          "unitCost": 19,
+          "hours": 5,
+          "capacity": 6
+        },
+        {
+          "id": "w1-f3",
+          "warehouse": "w1",
+          "factory": "f3",
+          "mode": "road",
+          "unitCost": 16,
+          "hours": 5,
+          "capacity": 5
+        },
+        {
+          "id": "w2-f1",
+          "warehouse": "w2",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 7,
+          "hours": 10,
+          "capacity": 4
+        },
+        {
+          "id": "w2-f3",
+          "warehouse": "w2",
+          "factory": "f3",
+          "mode": "road",
+          "unitCost": 17,
+          "hours": 5,
+          "capacity": 8
+        },
+        {
+          "id": "w3-f1",
+          "warehouse": "w3",
+          "factory": "f1",
+          "mode": "road",
+          "unitCost": 4,
+          "hours": 3,
+          "capacity": 7
+        },
+        {
+          "id": "w3-f3",
+          "warehouse": "w3",
+          "factory": "f3",
+          "mode": "road",
+          "unitCost": 17,
+          "hours": 5,
+          "capacity": 1
+        }
+      ],
+      "results": {
+        "greedy": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "o1",
+                "warehouse": "w3",
+                "part": "bearing",
+                "quantity": 1,
+                "laneId": "w3-f1",
+                "mode": "road",
+                "hours": 3,
+                "cost": 4,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o4",
+                "warehouse": "w2",
+                "part": "rotor",
+                "quantity": 2,
+                "laneId": "w2-f1",
+                "mode": "road",
+                "hours": 10,
+                "cost": 14,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o3",
+                "warehouse": "w3",
+                "part": "rotor",
+                "quantity": 1,
+                "laneId": "w3-f1",
+                "mode": "road",
+                "hours": 3,
+                "cost": 4,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o2",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 1,
+                "laneId": "w1-f1",
+                "mode": "road",
+                "hours": 3,
+                "cost": 20,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o0",
+                "warehouse": "w3",
+                "part": "bearing",
+                "quantity": 1,
+                "laneId": "w3-f1",
+                "mode": "road",
+                "hours": 3,
+                "cost": 4,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [
+              "o5",
+              "o6",
+              "o7"
+            ],
+            "totalCost": 46,
+            "fulfilledPriority": 44,
+            "solverStatus": "HEURISTIC",
+            "solveMs": 0.03,
+            "explanation": "Priority-first greedy: choose the cheapest feasible transfer for each order; no global optimality claim."
+          },
+          "wallMs": 0.031,
+          "violations": []
+        },
+        "optimized": {
+          "solution": {
+            "allocations": [
+              {
+                "orderId": "o1",
+                "warehouse": "w3",
+                "part": "bearing",
+                "quantity": 1,
+                "laneId": "w3-f1",
+                "mode": "road",
+                "hours": 3,
+                "cost": 4,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o4",
+                "warehouse": "w1",
+                "part": "rotor",
+                "quantity": 2,
+                "laneId": "w1-f1",
+                "mode": "road",
+                "hours": 3,
+                "cost": 40,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o3",
+                "warehouse": "w3",
+                "part": "rotor",
+                "quantity": 1,
+                "laneId": "w3-f1",
+                "mode": "road",
+                "hours": 3,
+                "cost": 4,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o7",
+                "warehouse": "w2",
+                "part": "rotor",
+                "quantity": 3,
+                "laneId": "w2-f3",
+                "mode": "road",
+                "hours": 5,
+                "cost": 51,
+                "stockVersion": 1
+              },
+              {
+                "orderId": "o0",
+                "warehouse": "w3",
+                "part": "bearing",
+                "quantity": 1,
+                "laneId": "w3-f1",
+                "mode": "road",
+                "hours": 3,
+                "cost": 4,
+                "stockVersion": 1
+              }
+            ],
+            "unfilled": [
+              "o2",
+              "o5",
+              "o6"
+            ],
+            "totalCost": 103,
+            "fulfilledPriority": 46,
+            "solverStatus": "OPTIMAL",
+            "solveMs": 1.037,
+            "explanation": "Maximum fulfilled priority, then minimum transport cost, proven for this snapshot and these constraints."
+          },
+          "wallMs": 1.038,
+          "violations": []
+        }
+      }
+    }
+  ]
+}

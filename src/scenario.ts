@@ -1,0 +1,127 @@
+import { randomUUID } from 'node:crypto';
+import type { Scenario, Stock } from '../shared/contracts.js';
+
+export function makeScenario(): { scenario: Scenario; stock: Stock[] } {
+  return {
+    scenario: {
+      id: randomUUID(),
+      name: 'The missing bearing',
+      description:
+        'A supplier delay puts three factory repairs at risk. Transfer available bearing kits before each repair window closes.',
+      orders: [
+        {
+          id: 'LINZ-104',
+          factory: 'Linz',
+          part: 'BRG-42',
+          quantity: 4,
+          deadlineHours: 8,
+          priority: 10,
+        },
+        {
+          id: 'GRAZ-208',
+          factory: 'Graz',
+          part: 'BRG-42',
+          quantity: 3,
+          deadlineHours: 12,
+          priority: 8,
+        },
+        {
+          id: 'BRNO-306',
+          factory: 'Brno',
+          part: 'BRG-42',
+          quantity: 2,
+          deadlineHours: 10,
+          priority: 6,
+        },
+      ],
+      lanes: [
+        {
+          id: 'VIE-LNZ',
+          warehouse: 'Vienna',
+          factory: 'Linz',
+          mode: 'Road courier',
+          hours: 3,
+          unitCost: 45,
+          capacity: 8,
+        },
+        {
+          id: 'BRQ-LNZ',
+          warehouse: 'Brno',
+          factory: 'Linz',
+          mode: 'Express van',
+          hours: 5,
+          unitCost: 90,
+          capacity: 6,
+        },
+        {
+          id: 'MUC-LNZ',
+          warehouse: 'Munich',
+          factory: 'Linz',
+          mode: 'Road courier',
+          hours: 6,
+          unitCost: 80,
+          capacity: 8,
+        },
+        {
+          id: 'VIE-GRZ',
+          warehouse: 'Vienna',
+          factory: 'Graz',
+          mode: 'Road courier',
+          hours: 3,
+          unitCost: 30,
+          capacity: 8,
+        },
+        {
+          id: 'BRQ-GRZ',
+          warehouse: 'Brno',
+          factory: 'Graz',
+          mode: 'Express van',
+          hours: 7,
+          unitCost: 85,
+          capacity: 6,
+        },
+        {
+          id: 'MUC-GRZ',
+          warehouse: 'Munich',
+          factory: 'Graz',
+          mode: 'Express van',
+          hours: 9,
+          unitCost: 100,
+          capacity: 8,
+        },
+        {
+          id: 'VIE-BRQ',
+          warehouse: 'Vienna',
+          factory: 'Brno',
+          mode: 'Road courier',
+          hours: 3,
+          unitCost: 20,
+          capacity: 8,
+        },
+        {
+          id: 'BRQ-BRQ',
+          warehouse: 'Brno',
+          factory: 'Brno',
+          mode: 'Local courier',
+          hours: 1,
+          unitCost: 15,
+          capacity: 6,
+        },
+        {
+          id: 'MUC-BRQ',
+          warehouse: 'Munich',
+          factory: 'Brno',
+          mode: 'Express van',
+          hours: 9,
+          unitCost: 110,
+          capacity: 8,
+        },
+      ],
+    },
+    stock: [
+      { warehouse: 'Vienna', part: 'BRG-42', available: 6, version: 1 },
+      { warehouse: 'Brno', part: 'BRG-42', available: 4, version: 1 },
+      { warehouse: 'Munich', part: 'BRG-42', available: 8, version: 1 },
+    ],
+  };
+}

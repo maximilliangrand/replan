@@ -1,0 +1,67 @@
+services:
+  postgres:
+    image: postgres:16-bookworm
+    environment:
+      POSTGRES_USER: replan
+      POSTGRES_PASSWORD: replan-local-demo
+      POSTGRES_DB: replan
+    volumes:
+      - database:/var/lib/postgresql/data
+      - ./scripts/docker-databases.sql:/docker-entrypoint-initdb.d/replan.sql:ro
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U replan]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+  inventory:
+    build: .
+    command: [node, --import, tsx, src/simulators/server.ts, inventory]
+    environment:
+      HOST: 0.0.0.0
+      INVENTORY_DATABASE_URL: postgres://replan:replan-local-demo@postgres/replan_inventory
+    depends_on:
+      postgres: { condition: service_healthy }
+    healthcheck:
+      test:
+        [
+          CMD,
+          node,
+          -e,
+          "fetch('http://127.0.0.1:4311/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 3s
+      timeout: 2s
+      retries: 30
+  carrier:
+    build: .
+    command: [node, --import, tsx, src/simulators/server.ts, carrier]
+    environment:
+      HOST: 0.0.0.0
+      CARRIER_DATABASE_URL: postgres://replan:replan-local-demo@postgres/replan_carrier
+    depends_on:
+      postgres: { condition: service_healthy }
+    healthcheck:
+      test:
+        [
+          CMD,
+          node,
+          -e,
+          "fetch('http://127.0.0.1:4312/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 3s
+      timeout: 2s
+      retries: 30
+  replan:
+    build: .
+    restart: on-failure
+    ports: ['127.0.0.1:4310:4310']
+    environment:
+      HOST: 0.0.0.0
+      DATABASE_URL: postgres://replan:replan-local-demo@postgres/replan
+      INVENTORY_URL: http://inventory:4311
+      CARRIER_URL: http://carrier:4312
+    depends_on:
+      inventory: { condition: service_healthy }
+      carrier: { condition: service_healthy }
+volumes:
+  database:

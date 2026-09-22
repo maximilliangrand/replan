@@ -1,0 +1,9 @@
+[project]
+name = "replan-solver"
+version = "0.1.0"
+description = "Bounded, auditable allocation planning for the Replan synthetic demo"
+requires-python = ">=3.12,<3.14"
+dependencies = ["ortools==9.14.6206"]
+
+[tool.uv]
+package = false

@@ -1,0 +1,9 @@
+.git
+.local
+node_modules
+dist
+solver/.venv
+**/__pycache__
+**/*.log
+.env
+test-results
