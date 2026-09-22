@@ -1,6 +1,14 @@
 import { z } from 'zod';
 import type { Shipment } from '../../shared/contracts.js';
-import { identifier, quantity, scenarioId, service, ServiceError, samePayload } from './common.js';
+import {
+  identifier,
+  quantity,
+  scenarioId,
+  service,
+  ServiceError,
+  samePayload,
+  type ServiceOptions,
+} from './common.js';
 
 const shipmentSchema = z.strictObject({
   key: identifier,
@@ -36,8 +44,8 @@ function shipment(row: ShipmentRow): Shipment {
   };
 }
 
-export async function createCarrier(databaseURL: string) {
-  const { app, pool } = service(databaseURL);
+export async function createCarrier(databaseURL: string, options: ServiceOptions = {}) {
+  const { app, pool } = service(databaseURL, options);
   await pool.query(`
     CREATE TABLE IF NOT EXISTS carrier_scenarios (
       id uuid PRIMARY KEY, lose_next_response boolean NOT NULL DEFAULT false,
@@ -50,6 +58,10 @@ export async function createCarrier(databaseURL: string) {
       cost double precision NOT NULL CHECK (cost >= 0),
       created_at timestamptz NOT NULL DEFAULT clock_timestamp(), payload jsonb NOT NULL,
       UNIQUE (scenario_id,order_id)
+    );
+    CREATE TABLE IF NOT EXISTS carrier_cancellations (
+      key text PRIMARY KEY, scenario_id uuid NOT NULL REFERENCES carrier_scenarios(id),
+      reason text NOT NULL, created_at timestamptz NOT NULL DEFAULT clock_timestamp()
     );
   `);
 
@@ -99,6 +111,11 @@ export async function createCarrier(databaseURL: string) {
       await client.query('SELECT pg_advisory_xact_lock(hashtextextended($1, 0))', [
         `shipment:${input.key}`,
       ]);
+      if (
+        (await client.query('SELECT key FROM carrier_cancellations WHERE key=$1', [input.key]))
+          .rowCount
+      )
+        throw new ServiceError(409, 'Shipment key has been permanently cancelled');
       const existing = await client.query<ShipmentRow>(
         'SELECT * FROM carrier_shipments WHERE key=$1',
         [input.key],
@@ -182,6 +199,55 @@ export async function createCarrier(databaseURL: string) {
     if (!result.rowCount || (query.scenarioId && result.rows[0]!.scenario_id !== query.scenarioId))
       throw new ServiceError(404, 'Shipment not found');
     return shipment(result.rows[0]!);
+  });
+
+  app.post('/shipments/:key/cancel', async (request) => {
+    const { key } = z.strictObject({ key: identifier }).parse(request.params);
+    const input = z
+      .strictObject({
+        scenarioId,
+        reason: z.string().trim().min(1).max(1_000),
+      })
+      .parse(request.body);
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      await client.query('SELECT pg_advisory_xact_lock(hashtextextended($1, 0))', [
+        `shipment:${key}`,
+      ]);
+      if (
+        !(await client.query('SELECT id FROM carrier_scenarios WHERE id=$1', [input.scenarioId]))
+          .rowCount
+      )
+        throw new ServiceError(404, 'Scenario not found');
+      const cancelled = await client.query<{ scenario_id: string }>(
+        'SELECT scenario_id FROM carrier_cancellations WHERE key=$1',
+        [key],
+      );
+      if (cancelled.rowCount && cancelled.rows[0]!.scenario_id !== input.scenarioId)
+        throw new ServiceError(409, 'Cancellation key belongs to another scenario');
+      const existing = await client.query<ShipmentRow>(
+        'SELECT * FROM carrier_shipments WHERE key=$1',
+        [key],
+      );
+      if (existing.rowCount) {
+        if (existing.rows[0]!.scenario_id !== input.scenarioId)
+          throw new ServiceError(409, 'Shipment belongs to another scenario');
+        await client.query('COMMIT');
+        return { outcome: 'dispatched', shipment: shipment(existing.rows[0]!) };
+      }
+      await client.query(
+        'INSERT INTO carrier_cancellations(key,scenario_id,reason) VALUES($1,$2,$3) ON CONFLICT DO NOTHING',
+        [key, input.scenarioId, input.reason],
+      );
+      await client.query('COMMIT');
+      return { outcome: 'cancelled', key, scenarioId: input.scenarioId };
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
   });
 
   app.post('/scenarios/:id/fault', async (request) => {

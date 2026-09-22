@@ -10,6 +10,8 @@ import type {
 import { audit, Conflict, context, getPlan, getPlans, transaction } from './db.js';
 import { canonicalJson, planHash } from './planner.js';
 import { carrier, inventory, ProviderError } from './providers.js';
+import { principal, workspaceId } from './workspace.js';
+import { config } from './config.js';
 
 async function status(db: PoolClient, plan: Plan, next: PlanStatus, reason: string | null) {
   await transaction(db, async () => {
@@ -55,6 +57,26 @@ async function block(db: PoolClient, plan: Plan, action: Action, message: string
   await status(db, plan, 'needs_replan', message);
 }
 
+function verifyReservation(
+  reservation: Reservation,
+  plan: Plan,
+  action: Action,
+  expected: Reservation['status'],
+) {
+  const a = action.allocation;
+  if (
+    reservation.key !== action.id ||
+    reservation.scenarioId !== plan.scenarioId ||
+    reservation.warehouse !== a.warehouse ||
+    reservation.part !== a.part ||
+    reservation.quantity !== a.quantity ||
+    reservation.status !== expected
+  )
+    throw new Error(
+      'Inventory evidence conflicts with the approved action. Manual review required.',
+    );
+}
+
 export async function approve(db: PoolClient, id: string, hash: string) {
   const plan = await getPlan(id, db);
   if (hash !== plan.hash)
@@ -85,10 +107,11 @@ export async function approve(db: PoolClient, id: string, hash: string) {
       'The proposal is over ten minutes old. Refresh stock and generate a new proposal.',
     );
   await transaction(db, async () => {
-    await db.query('INSERT INTO approvals(plan_id,plan_hash,actor) VALUES($1,$2,$3)', [
+    await db.query('INSERT INTO approvals(plan_id,plan_hash,actor,actor_id) VALUES($1,$2,$3,$4)', [
       id,
       hash,
-      'Demo operator',
+      principal().name,
+      config.mode === 'pilot' ? principal().id : null,
     ]);
     await db.query("UPDATE plans SET status='approved',approved_at=now() WHERE id=$1", [id]);
     await db.query(
@@ -100,19 +123,14 @@ export async function approve(db: PoolClient, id: string, hash: string) {
       plan.scenarioId,
       'plan.approved',
       'Operator approved the exact allocations, cost, and source versions.',
-      { hash, actor: 'Demo operator', totalCost: plan.solution.totalCost },
+      { hash, totalCost: plan.solution.totalCost },
       id,
     );
   });
 }
 
-export async function execute(db: PoolClient, id: string, oneStep = false) {
-  const plan = await getPlan(id, db);
-  if (plan.status === 'completed') return;
-  if (!['approved', 'executing', 'uncertain'].includes(plan.status))
-    throw new Conflict(
-      'Approve this proposal before execution, or create a new plan after invalidation.',
-    );
+async function verifyApproval(db: PoolClient, plan: Plan) {
+  const id = plan.id;
   const approval = (await db.query('SELECT plan_hash FROM approvals WHERE plan_id=$1', [id]))
     .rows[0];
   if (
@@ -122,6 +140,17 @@ export async function execute(db: PoolClient, id: string, oneStep = false) {
       canonicalJson(plan.solution.allocations)
   )
     throw new Conflict('Approved plan integrity check failed. No actions were sent.');
+}
+
+export async function execute(db: PoolClient, id: string, oneStep = false) {
+  const plan = await getPlan(id, db);
+  if (plan.status === 'completed') return;
+  if (plan.cancelReason) return cancelPlan(db, id, plan.cancelReason);
+  if (!['approved', 'executing', 'uncertain'].includes(plan.status))
+    throw new Conflict(
+      'Approve this proposal before execution, or create a new plan after invalidation.',
+    );
+  await verifyApproval(db, plan);
   const ctx = await context(db);
   await status(db, plan, 'executing', null);
   for (const action of plan.actions) {
@@ -142,7 +171,8 @@ export async function execute(db: PoolClient, id: string, oneStep = false) {
       let reservation = await inventory.find(action.id);
       if (
         reservation &&
-        (reservation.warehouse !== a.warehouse ||
+        (reservation.key !== action.id ||
+          reservation.warehouse !== a.warehouse ||
           reservation.part !== a.part ||
           reservation.quantity !== a.quantity ||
           reservation.scenarioId !== plan.scenarioId)
@@ -196,6 +226,7 @@ export async function execute(db: PoolClient, id: string, oneStep = false) {
             quantity: a.quantity,
             expectedVersion: a.stockVersion + previous,
           });
+          verifyReservation(reservation, plan, action, 'held');
         } catch (error) {
           if (error instanceof ProviderError && error.status === 409) {
             await block(
@@ -225,7 +256,8 @@ export async function execute(db: PoolClient, id: string, oneStep = false) {
             throw new Error(
               'A previous dispatch may still commit after the deadline. Inventory remains held pending carrier confirmation or manual review.',
             );
-          await inventory.release(action.id);
+          const released = await inventory.release(action.id);
+          verifyReservation(released, plan, action, 'released');
           await block(
             db,
             plan,
@@ -253,7 +285,8 @@ export async function execute(db: PoolClient, id: string, oneStep = false) {
         // Intentionally die after the irreversible effect but before recording it.
         // The supervisor/test restarts a NEW process; no in-memory recovery shortcut.
         const crash = await db.query(
-          'UPDATE scenario_state SET crash_next=false WHERE singleton AND crash_next=true RETURNING singleton',
+          'UPDATE scenario_state SET crash_next=false WHERE workspace_id=$1 AND crash_next=true RETURNING workspace_id',
+          [workspaceId()],
         );
         if (crash.rowCount) process.exit(86);
       } else {
@@ -268,6 +301,7 @@ export async function execute(db: PoolClient, id: string, oneStep = false) {
         );
       }
       if (
+        shipment.key !== action.id ||
         shipment.scenarioId !== plan.scenarioId ||
         shipment.orderId !== a.orderId ||
         shipment.warehouse !== a.warehouse ||
@@ -287,6 +321,7 @@ export async function execute(db: PoolClient, id: string, oneStep = false) {
         { shipment },
       );
       const consumed = await inventory.consume(action.id);
+      verifyReservation(consumed, plan, action, 'consumed');
       await transition(
         db,
         plan,
@@ -329,4 +364,128 @@ export async function markInterrupted(db: PoolClient) {
         'The executor restarted. Reconcile external outcomes before resuming.',
       );
   }
+}
+
+/** Terminal provider cancellation wins the same per-key lock as creation.
+ * A missing receipt alone never authorizes releasing potentially committed stock.
+ * The durable intent routes every subsequent retry back through cancellation.
+ */
+export async function cancelPlan(db: PoolClient, id: string, reason: string) {
+  const plan = await getPlan(id, db);
+  if (plan.status === 'completed' || (plan.status === 'needs_replan' && plan.cancelReason)) return;
+  if (!['approved', 'executing', 'uncertain'].includes(plan.status))
+    throw new Conflict('Only an approved or unresolved operation can be cancelled.');
+  await verifyApproval(db, plan);
+  const originalReason = plan.cancelReason ?? reason;
+  if (!plan.cancelReason) {
+    await transaction(db, async () => {
+      await db.query(
+        "UPDATE plans SET cancel_reason=$2,status='uncertain',reason='Cancellation requested; provider outcomes are being reconciled.' WHERE id=$1",
+        [id, originalReason],
+      );
+      await audit(
+        db,
+        plan.scenarioId,
+        'plan.cancellation_requested',
+        'Operator requested terminal cancellation of the remaining work.',
+        { reason: originalReason },
+        id,
+      );
+    });
+  }
+  for (const action of plan.actions) {
+    if (action.stage === 'completed') continue;
+    try {
+      const outcome = await carrier.cancel(action.id, plan.scenarioId, originalReason);
+      if (outcome.outcome === 'dispatched') {
+        const s = outcome.shipment;
+        const a = action.allocation;
+        if (
+          s.key !== action.id ||
+          s.scenarioId !== plan.scenarioId ||
+          s.orderId !== a.orderId ||
+          s.warehouse !== a.warehouse ||
+          s.quantity !== a.quantity ||
+          s.laneId !== a.laneId ||
+          s.cost !== a.cost
+        )
+          throw new Error('Carrier cancellation returned conflicting dispatch evidence.');
+        await transition(
+          db,
+          plan,
+          action,
+          'dispatched',
+          'Cancellation reconciled an already committed shipment; it is retained.',
+          { shipment: s },
+        );
+        const reservation = await inventory.consume(action.id);
+        verifyReservation(reservation, plan, action, 'consumed');
+        await transition(
+          db,
+          plan,
+          action,
+          'completed',
+          'The committed transfer is retained and inventory bookkeeping is complete.',
+          { shipment: s, reservation },
+        );
+      } else {
+        if (action.shipment || action.stage === 'dispatched')
+          throw new Error(
+            'Cancellation contradicts recorded dispatch evidence. Manual review required.',
+          );
+        if (outcome.key !== action.id || outcome.scenarioId !== plan.scenarioId)
+          throw new Error('Carrier cancellation receipt does not match this operation.');
+        await audit(
+          db,
+          plan.scenarioId,
+          'carrier.cancelled',
+          'Carrier guarantees this action key cannot commit a future shipment.',
+          { receipt: outcome },
+          id,
+          action.id,
+        );
+        const cancelled = await inventory.cancel(action.id, plan.scenarioId, originalReason);
+        if (cancelled.key !== action.id || cancelled.scenarioId !== plan.scenarioId)
+          throw new Error('Inventory cancellation receipt does not match this operation.');
+        if (cancelled.reservation)
+          verifyReservation(cancelled.reservation, plan, action, 'released');
+        await transition(
+          db,
+          plan,
+          action,
+          'blocked',
+          'Transfer cancelled with terminal provider receipts.',
+          {
+            ...(cancelled.reservation ? { reservation: cancelled.reservation } : {}),
+            error: originalReason,
+          },
+        );
+        await audit(
+          db,
+          plan.scenarioId,
+          'inventory.cancelled',
+          'Inventory reservation is terminally cancelled; any held units were released.',
+          { receipt: cancelled },
+          id,
+          action.id,
+        );
+      }
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Cancellation outcome is unresolved.';
+      await status(
+        db,
+        plan,
+        'uncertain',
+        `Cancellation is pending: ${message} Retry recovery; a new plan remains blocked.`,
+      );
+      return;
+    }
+  }
+  await status(
+    db,
+    plan,
+    plan.actions.every((a) => a.stage === 'completed') ? 'completed' : 'needs_replan',
+    'Cancellation reconciled. Confirmed transfers are retained; remaining demand requires a fresh proposal and approval.',
+  );
 }

@@ -25,6 +25,7 @@ let child: ChildProcess;
 let base: string;
 let inventoryUrl: string;
 let carrierUrl: string;
+let corruptNextReservationReceipt = false;
 let logs = '';
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 async function freePort() {
@@ -98,12 +99,26 @@ const from = (s: AppState, p: Plan) => s.plans.find((x) => x.id === p.id)!;
 beforeAll(async () => {
   // Dedicated *_test databases only; no TRUNCATE or reset of any developer data.
   inventory = await createInventory(inventoryDatabase);
+  inventory.addHook('onSend', async (request, reply, payload) => {
+    if (
+      corruptNextReservationReceipt &&
+      request.method === 'POST' &&
+      request.url === '/reservations' &&
+      reply.statusCode === 201
+    ) {
+      corruptNextReservationReceipt = false;
+      const receipt = JSON.parse(payload as string) as Record<string, unknown>;
+      return JSON.stringify({ ...receipt, key: 'receipt-for-another-action' });
+    }
+    return payload;
+  });
   carrier = await createCarrier(carrierDatabase);
   inventoryUrl = await inventory.listen({ host: '127.0.0.1', port: 0 });
   carrierUrl = await carrier.listen({ host: '127.0.0.1', port: 0 });
   await start();
 });
 beforeEach(async () => {
+  corruptNextReservationReceipt = false;
   await call('/demo/reset', {});
 });
 afterAll(async () => {
@@ -165,6 +180,27 @@ describe('approved transfers against independently persistent providers', () => 
     const s = await call(`/plans/${p.id}/execute`, {});
     expect(from(s, p).status).toBe('needs_replan');
     expect(s.world?.shipments).toHaveLength(0);
+  });
+  it('holds execution when a successful reservation returns valid-shaped evidence for another action', async () => {
+    const plan = await approved();
+    corruptNextReservationReceipt = true;
+    const uncertain = await call(`/plans/${plan.id}/execute`, {});
+    expect(corruptNextReservationReceipt).toBe(false);
+    expect(from(uncertain, plan).status).toBe('uncertain');
+    expect(from(uncertain, plan).actions[0].stage).toBe('reserving');
+    expect(from(uncertain, plan).actions[0].error).toContain('conflicts with the approved action');
+    expect(uncertain.world?.shipments).toEqual([]);
+    expect(uncertain.world?.reservations).toHaveLength(1);
+    expect(uncertain.world?.reservations[0]).toMatchObject({
+      key: plan.actions[0].id,
+      status: 'held',
+    });
+    expect(uncertain.events.some((event) => event.kind === 'action.dispatching')).toBe(false);
+    await call('/plans', { strategy: 'optimized' }, 409);
+    const recovered = await call(`/plans/${plan.id}/recover`, {});
+    expect(from(recovered, plan).status).toBe('completed');
+    expect(recovered.world?.shipments).toHaveLength(3);
+    expect(new Set(recovered.world?.shipments.map((shipment) => shipment.key)).size).toBe(3);
   });
   it('keeps completed transfers when later stock changes, requiring fresh approval for the remainder', async () => {
     const p = await approved();
@@ -247,7 +283,7 @@ describe('approved transfers against independently persistent providers', () => 
       expect(timedOut.world?.shipments).toHaveLength(0);
       expect(timedOut.world?.reservations[0].status).toBe('held');
       await db.query(
-        "UPDATE scenario_state SET created_at=now()-interval '24 hours' WHERE singleton",
+        "UPDATE scenario_state SET created_at=now()-interval '24 hours' WHERE workspace_id='00000000-0000-4000-8000-000000000001'",
       );
 
       // A provider outage must not erase the durable fact that dispatch was attempted.
@@ -317,7 +353,7 @@ describe('approved transfers against independently persistent providers', () => 
     expect(held.world?.reservations[0].status).toBe('held');
     expect(held.events.some((event) => event.kind === 'action.dispatching')).toBe(false);
     await db.query(
-      "UPDATE scenario_state SET created_at=now()-interval '24 hours' WHERE singleton",
+      "UPDATE scenario_state SET created_at=now()-interval '24 hours' WHERE workspace_id='00000000-0000-4000-8000-000000000001'",
     );
     await call('/demo/fault', { fault: 'clear' });
     const expired = await call(`/plans/${p.id}/recover`, {});
@@ -366,7 +402,7 @@ describe('approved transfers against independently persistent providers', () => 
       expect(from(timedOut, p).actions[0].stage).toBe('reserving');
       expect(timedOut.world?.reservations).toHaveLength(0);
       await db.query(
-        "UPDATE scenario_state SET created_at=now()-interval '24 hours' WHERE singleton",
+        "UPDATE scenario_state SET created_at=now()-interval '24 hours' WHERE workspace_id='00000000-0000-4000-8000-000000000001'",
       );
 
       for (let attempt = 0; attempt < 2; attempt++) {
@@ -454,7 +490,7 @@ describe('approved transfers against independently persistent providers', () => 
   it('invalidates a plan when its actual repair window has expired', async () => {
     const p = await approved();
     await db.query(
-      "UPDATE scenario_state SET created_at=now()-interval '24 hours' WHERE singleton",
+      "UPDATE scenario_state SET created_at=now()-interval '24 hours' WHERE workspace_id='00000000-0000-4000-8000-000000000001'",
     );
     const s = await call(`/plans/${p.id}/execute`, {});
     expect(from(s, p).status).toBe('needs_replan');
@@ -491,5 +527,268 @@ describe('approved transfers against independently persistent providers', () => 
       ),
     ).toBeGreaterThan(0);
     await call(`/plans/${p.id}/execute`, {}, 409);
+  });
+});
+
+describe('operator cancellation against terminal provider receipts', () => {
+  const reason = 'Repair work was rescheduled by the operator.';
+
+  async function tombstones(plan: Plan) {
+    return {
+      carrier: (
+        await carrierDb.query(
+          'SELECT key FROM carrier_cancellations WHERE scenario_id=$1 ORDER BY key',
+          [plan.scenarioId],
+        )
+      ).rows.map((row: { key: string }) => row.key),
+      inventory: (
+        await inventoryDb.query(
+          'SELECT key FROM inventory_cancellations WHERE scenario_id=$1 ORDER BY key',
+          [plan.scenarioId],
+        )
+      ).rows.map((row: { key: string }) => row.key),
+    };
+  }
+
+  it('cancels an approved plan before execution, permanently fences every key, and requires new approval', async () => {
+    const plan = await approved();
+    const cancelled = await call(`/plans/${plan.id}/cancel`, { reason });
+    expect(from(cancelled, plan).status).toBe('needs_replan');
+    expect(from(cancelled, plan).cancelReason).toBe(reason);
+    expect(from(cancelled, plan).actions.every((action) => action.stage === 'blocked')).toBe(true);
+    expect(cancelled.world?.shipments).toEqual([]);
+    expect(cancelled.world?.reservations).toEqual([]);
+    expect(cancelled.world?.stock).toEqual(
+      [...plan.snapshot.stock].sort(
+        (left, right) =>
+          left.warehouse.localeCompare(right.warehouse) || left.part.localeCompare(right.part),
+      ),
+    );
+    const keys = plan.actions.map((action) => action.id).sort();
+    expect(await tombstones(plan)).toEqual({ carrier: keys, inventory: keys });
+    expect(verifyEvidence(await call('/audit')).valid).toBe(true);
+    // A second cancellation preserves the original reason and does not repeat intent.
+    const again = await call(`/plans/${plan.id}/cancel`, {
+      reason: 'A second click must not rewrite the original intent.',
+    });
+    expect(from(again, plan).cancelReason).toBe(reason);
+    expect(
+      again.events.filter((event) => event.kind === 'plan.cancellation_requested'),
+    ).toHaveLength(1);
+    const replacement = await proposal();
+    expect(replacement.actions).toHaveLength(plan.actions.length);
+    await call(`/plans/${replacement.id}/execute`, {}, 409);
+    await call(`/plans/${replacement.id}/approve`, { hash: replacement.hash });
+    const completed = await call(`/plans/${replacement.id}/execute`, {});
+    expect(from(completed, replacement).status).toBe('completed');
+    expect(completed.world?.shipments).toHaveLength(3);
+  });
+
+  it('retains a completed transfer and consumed inventory while cancelling only remaining work', async () => {
+    const plan = await approved();
+    const partial = await call(`/plans/${plan.id}/step`, {});
+    const completedAction = from(partial, plan).actions.find(
+      (action) => action.stage === 'completed',
+    )!;
+    const committedShipment = partial.world!.shipments[0];
+    const consumedReservation = partial.world!.reservations[0];
+    const cancelled = await call(`/plans/${plan.id}/cancel`, { reason });
+    expect(from(cancelled, plan).status).toBe('needs_replan');
+    expect(
+      from(cancelled, plan).actions.find((action) => action.id === completedAction.id)?.stage,
+    ).toBe('completed');
+    expect(cancelled.world?.shipments).toEqual([committedShipment]);
+    expect(cancelled.world?.reservations).toEqual([consumedReservation]);
+    const cancelledKeys = plan.actions
+      .filter((action) => action.id !== completedAction.id)
+      .map((action) => action.id)
+      .sort();
+    expect(await tombstones(plan)).toEqual({ carrier: cancelledKeys, inventory: cancelledKeys });
+    expect(verifyEvidence(await call('/audit')).valid).toBe(true);
+    await call('/observe', {});
+    const replacement = await proposal();
+    expect(replacement.actions).toHaveLength(2);
+    expect(
+      replacement.actions.some((action) => action.allocation.orderId === committedShipment.orderId),
+    ).toBe(false);
+    await call(`/plans/${replacement.id}/approve`, { hash: replacement.hash });
+    const completed = await call(`/plans/${replacement.id}/execute`, {});
+    expect(from(completed, replacement).status).toBe('completed');
+    expect(completed.world?.shipments).toHaveLength(3);
+    expect(new Set(completed.world?.shipments.map((shipment) => shipment.orderId)).size).toBe(3);
+    expect(
+      completed.world?.shipments.find((shipment) => shipment.key === committedShipment.key),
+    ).toEqual(committedShipment);
+    expect(
+      completed.world?.reservations.every((reservation) => reservation.status === 'consumed'),
+    ).toBe(true);
+  });
+
+  it('reconciles an accepted shipment after a lost dispatch response while terminally cancelling the remainder', async () => {
+    const plan = await approved();
+    await call('/demo/fault', { fault: 'lost_response' });
+    const uncertain = await call(`/plans/${plan.id}/execute`, {});
+    const committed = uncertain.world!.shipments[0];
+    expect(from(uncertain, plan).actions[0].stage).toBe('dispatch_unknown');
+    expect(uncertain.world?.reservations[0].status).toBe('held');
+    const cancelled = await call(`/plans/${plan.id}/cancel`, { reason });
+    expect(from(cancelled, plan).status).toBe('needs_replan');
+    expect(cancelled.world?.shipments).toEqual([committed]);
+    expect(from(cancelled, plan).actions[0]).toMatchObject({
+      stage: 'completed',
+      shipment: committed,
+      reservation: { status: 'consumed' },
+    });
+    expect(cancelled.world?.reservations).toHaveLength(1);
+    expect(cancelled.world?.reservations[0].status).toBe('consumed');
+    const expected = plan.actions
+      .slice(1)
+      .map((action) => action.id)
+      .sort();
+    expect(await tombstones(plan)).toEqual({ carrier: expected, inventory: expected });
+    expect(verifyEvidence(await call('/audit')).valid).toBe(true);
+    const recovered = await call(`/plans/${plan.id}/recover`, {});
+    expect(recovered.world?.shipments).toEqual([committed]);
+    expect(recovered.events.filter((event) => event.kind === 'action.dispatching')).toHaveLength(1);
+  });
+
+  it('keeps stock held and blocks replacements during carrier downtime, then resumes cancellation on recovery', async () => {
+    const plan = await approved();
+    await call('/demo/fault', { fault: 'lookup_unavailable' });
+    const held = await call(`/plans/${plan.id}/execute`, {});
+    expect(from(held, plan).actions[0].stage).toBe('reserved');
+    expect(held.world?.reservations[0].status).toBe('held');
+    const address = new URL(carrierUrl);
+    await carrier.close();
+    let restarted = false;
+    try {
+      const pending = await call(`/plans/${plan.id}/cancel`, { reason });
+      expect(from(pending, plan).status).toBe('uncertain');
+      expect(from(pending, plan).cancelReason).toBe(reason);
+      const stockStillHeld = await fetch(`${inventoryUrl}/scenarios/${plan.scenarioId}`).then(
+        (response) => response.json(),
+      );
+      expect(stockStillHeld.reservations[0].status).toBe('held');
+      expect(stockStillHeld.stock).toEqual(held.world!.stock);
+      expect(await tombstones(plan)).toEqual({ carrier: [], inventory: [] });
+      await call('/plans', { strategy: 'optimized' }, 409);
+      carrier = await createCarrier(carrierDatabase);
+      await carrier.listen({ host: address.hostname, port: Number(address.port) });
+      restarted = true;
+      const cancelled = await call(`/plans/${plan.id}/recover`, {});
+      expect(from(cancelled, plan).status).toBe('needs_replan');
+      expect(cancelled.world?.shipments).toEqual([]);
+      expect(cancelled.world?.reservations[0].status).toBe('released');
+      const restored = cancelled.world!.stock.find(
+        (stock) =>
+          stock.warehouse === plan.actions[0].allocation.warehouse &&
+          stock.part === plan.actions[0].allocation.part,
+      )!;
+      const initial = plan.snapshot.stock.find(
+        (stock) => stock.warehouse === restored.warehouse && stock.part === restored.part,
+      )!;
+      expect(restored).toEqual({ ...initial, version: initial.version + 2 });
+      const keys = plan.actions.map((action) => action.id).sort();
+      expect(await tombstones(plan)).toEqual({ carrier: keys, inventory: keys });
+      expect(cancelled.events.some((event) => event.kind === 'action.dispatching')).toBe(false);
+      await call('/observe', {});
+      expect((await proposal()).status).toBe('proposed');
+    } finally {
+      if (!restarted) {
+        carrier = await createCarrier(carrierDatabase);
+        await carrier.listen({ host: address.hostname, port: Number(address.port) });
+      }
+    }
+  });
+
+  it('finishes as completed when the final unknown dispatch had already committed', async () => {
+    const plan = await approved();
+    await call(`/plans/${plan.id}/step`, {});
+    await call(`/plans/${plan.id}/step`, {});
+    await call('/demo/fault', { fault: 'lost_response' });
+    const uncertain = await call(`/plans/${plan.id}/execute`, {});
+    expect(from(uncertain, plan).status).toBe('uncertain');
+    expect(uncertain.world?.shipments).toHaveLength(plan.actions.length);
+    const cancelled = await call(`/plans/${plan.id}/cancel`, { reason });
+    expect(from(cancelled, plan).status).toBe('completed');
+    expect(from(cancelled, plan).actions.every((action) => action.stage === 'completed')).toBe(
+      true,
+    );
+    expect(cancelled.world?.shipments).toEqual(uncertain.world?.shipments);
+    expect(
+      cancelled.world?.reservations.every((reservation) => reservation.status === 'consumed'),
+    ).toBe(true);
+    expect(await tombstones(plan)).toEqual({ carrier: [], inventory: [] });
+    expect(verifyEvidence(await call('/audit')).valid).toBe(true);
+  });
+
+  it('persists cancellation intent through a real process kill and makes execute resume cancellation instead of dispatch', async () => {
+    const plan = await approved();
+    const action = plan.actions[0];
+    const blocker = await carrierDb.connect();
+    try {
+      await blocker.query('BEGIN');
+      await blocker.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))', [
+        `shipment:${action.id}`,
+      ]);
+      const blockerPid = (await blocker.query('SELECT pg_backend_pid() AS pid')).rows[0].pid;
+      const pending = fetch(`${base}/api/plans/${plan.id}/cancel`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ reason }),
+      });
+      const interrupted = expect(pending).rejects.toThrow();
+      await expect
+        .poll(
+          async () =>
+            (
+              await carrierDb.query(
+                `
+        SELECT EXISTS (SELECT 1 FROM pg_stat_activity WHERE datname=current_database() AND $1=ANY(pg_blocking_pids(pid))) AS waiting`,
+                [blockerPid],
+              )
+            ).rows[0].waiting,
+        )
+        .toBe(true);
+      expect(
+        (await db.query('SELECT cancel_reason,status FROM plans WHERE id=$1', [plan.id])).rows[0],
+      ).toEqual({ cancel_reason: reason, status: 'uncertain' });
+      const exited = once(child, 'exit');
+      child.kill('SIGKILL');
+      expect((await exited)[1]).toBe('SIGKILL');
+      await interrupted;
+      await start();
+      const restarted = await call('/state');
+      expect(from(restarted, plan)).toMatchObject({ status: 'uncertain', cancelReason: reason });
+      expect(restarted.world?.shipments).toEqual([]);
+      await call('/plans', { strategy: 'optimized' }, 409);
+      // The old provider request may still complete after its app process died.
+      await blocker.query('COMMIT');
+      await expect
+        .poll(
+          async () =>
+            (
+              await carrierDb.query(
+                'SELECT count(*)::int AS count FROM carrier_cancellations WHERE key=$1',
+                [action.id],
+              )
+            ).rows[0].count,
+        )
+        .toBe(1);
+      const resumed = await call(`/plans/${plan.id}/execute`, {});
+      expect(from(resumed, plan)).toMatchObject({ status: 'needs_replan', cancelReason: reason });
+      expect(resumed.world?.shipments).toEqual([]);
+      expect(resumed.world?.reservations).toEqual([]);
+      expect(resumed.events.some((event) => event.kind === 'action.dispatching')).toBe(false);
+      expect(
+        resumed.events.filter((event) => event.kind === 'plan.cancellation_requested'),
+      ).toHaveLength(1);
+      const keys = plan.actions.map((item) => item.id).sort();
+      expect(await tombstones(plan)).toEqual({ carrier: keys, inventory: keys });
+    } finally {
+      await blocker.query('ROLLBACK');
+      blocker.release();
+      if (child.exitCode !== null || child.signalCode !== null) await start();
+    }
   });
 });

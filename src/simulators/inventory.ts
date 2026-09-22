@@ -8,6 +8,7 @@ import {
   ServiceError,
   samePayload,
   version,
+  type ServiceOptions,
 } from './common.js';
 
 const stockSchema = z.strictObject({
@@ -34,6 +35,10 @@ const reservationSchema = z.strictObject({
 });
 const externalConsumeSchema = z.strictObject({ warehouse: identifier, part: identifier, quantity });
 const emptySchema = z.strictObject({});
+const cancellationSchema = z.strictObject({
+  scenarioId,
+  reason: z.string().trim().min(1).max(1_000),
+});
 
 interface StockRow {
   warehouse: string;
@@ -63,8 +68,8 @@ function reservation(row: ReservationRow): Reservation {
   };
 }
 
-export async function createInventory(databaseURL: string) {
-  const { app, pool } = service(databaseURL);
+export async function createInventory(databaseURL: string, options: ServiceOptions = {}) {
+  const { app, pool } = service(databaseURL, options);
   await pool.query(`
     CREATE TABLE IF NOT EXISTS inventory_scenarios (
       id uuid PRIMARY KEY, initial_stock jsonb NOT NULL
@@ -83,6 +88,10 @@ export async function createInventory(databaseURL: string) {
       status text NOT NULL CHECK (status IN ('held', 'consumed', 'released')), payload jsonb NOT NULL
     );
     CREATE INDEX IF NOT EXISTS inventory_reservations_scenario ON inventory_reservations(scenario_id);
+    CREATE TABLE IF NOT EXISTS inventory_cancellations (
+      key text PRIMARY KEY, scenario_id uuid NOT NULL REFERENCES inventory_scenarios(id),
+      reason text NOT NULL, created_at timestamptz NOT NULL DEFAULT clock_timestamp()
+    );
   `);
 
   app.post('/scenarios', async (request, reply) => {
@@ -160,6 +169,11 @@ export async function createInventory(databaseURL: string) {
       await client.query('SELECT pg_advisory_xact_lock(hashtextextended($1, 0))', [
         `reservation:${input.key}`,
       ]);
+      if (
+        (await client.query('SELECT key FROM inventory_cancellations WHERE key=$1', [input.key]))
+          .rowCount
+      )
+        throw new ServiceError(409, 'Reservation key has been permanently cancelled');
       const existing = await client.query<ReservationRow>(
         'SELECT * FROM inventory_reservations WHERE key=$1',
         [input.key],
@@ -211,6 +225,68 @@ export async function createInventory(databaseURL: string) {
     );
     if (!result.rowCount) throw new ServiceError(404, 'Reservation not found');
     return reservation(result.rows[0]!);
+  });
+
+  app.post('/reservations/:key/cancel', async (request) => {
+    const { key } = z.strictObject({ key: identifier }).parse(request.params);
+    const input = cancellationSchema.parse(request.body);
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      // This is the same lock used by reserve. A committed tombstone closes the
+      // key permanently, including requests still in flight after a timeout.
+      await client.query('SELECT pg_advisory_xact_lock(hashtextextended($1, 0))', [
+        `reservation:${key}`,
+      ]);
+      if (
+        !(await client.query('SELECT id FROM inventory_scenarios WHERE id=$1', [input.scenarioId]))
+          .rowCount
+      )
+        throw new ServiceError(404, 'Scenario not found');
+      const cancelled = await client.query<{ scenario_id: string }>(
+        'SELECT scenario_id FROM inventory_cancellations WHERE key=$1',
+        [key],
+      );
+      if (cancelled.rowCount && cancelled.rows[0]!.scenario_id !== input.scenarioId)
+        throw new ServiceError(409, 'Cancellation key belongs to another scenario');
+      const existing = await client.query<ReservationRow>(
+        'SELECT * FROM inventory_reservations WHERE key=$1 FOR UPDATE',
+        [key],
+      );
+      let current = existing.rows[0];
+      if (current && current.scenario_id !== input.scenarioId)
+        throw new ServiceError(409, 'Reservation belongs to another scenario');
+      if (current?.status === 'consumed')
+        throw new ServiceError(409, 'Dispatched inventory cannot be cancelled');
+      if (current?.status === 'held') {
+        const stock = await client.query<{ version: number }>(
+          `UPDATE inventory_stock SET available=available+$4,version=version+1
+           WHERE scenario_id=$1 AND warehouse=$2 AND part=$3 RETURNING version`,
+          [current.scenario_id, current.warehouse, current.part, current.quantity],
+        );
+        const released = await client.query<ReservationRow>(
+          "UPDATE inventory_reservations SET status='released',version=$2 WHERE key=$1 RETURNING *",
+          [key, stock.rows[0]!.version],
+        );
+        current = released.rows[0]!;
+      }
+      await client.query(
+        'INSERT INTO inventory_cancellations(key,scenario_id,reason) VALUES($1,$2,$3) ON CONFLICT DO NOTHING',
+        [key, input.scenarioId, input.reason],
+      );
+      await client.query('COMMIT');
+      return {
+        outcome: 'cancelled',
+        key,
+        scenarioId: input.scenarioId,
+        reservation: current ? reservation(current) : null,
+      };
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
   });
 
   app.post('/reservations/:key/consume', async (request) => {

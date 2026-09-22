@@ -1,4 +1,5 @@
 import Fastify from 'fastify';
+import { createHash, timingSafeEqual } from 'node:crypto';
 import { Pool } from 'pg';
 import { z, ZodError } from 'zod';
 
@@ -16,7 +17,11 @@ export class ServiceError extends Error {
   }
 }
 
-export function service(databaseURL: string) {
+export interface ServiceOptions {
+  token?: string;
+}
+
+export function service(databaseURL: string, options: ServiceOptions = {}) {
   const pool = new Pool({ connectionString: databaseURL, max: 8 });
   const app = Fastify({ logger: false, bodyLimit: 256 * 1024 });
   app.addHook('onRequest', async (request, reply) => {
@@ -31,6 +36,16 @@ export function service(databaseURL: string) {
         throw new Error('untrusted origin');
     } catch {
       return reply.code(403).send({ error: 'Simulator access is restricted to the local demo.' });
+    }
+    // Hash both values to fixed-size buffers before comparison; do not expose a
+    // token-length-dependent comparison or put credentials in logs/errors.
+    if (options.token && request.url.split('?')[0] !== '/health') {
+      const expected = createHash('sha256').update(`Bearer ${options.token}`).digest();
+      const actual = createHash('sha256')
+        .update(request.headers.authorization ?? '')
+        .digest();
+      if (!timingSafeEqual(expected, actual))
+        return reply.code(401).send({ error: 'Service authentication required' });
     }
   });
   app.addHook('onClose', async () => {

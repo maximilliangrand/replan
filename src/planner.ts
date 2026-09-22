@@ -4,6 +4,7 @@ import type { PoolClient } from 'pg';
 import { z } from 'zod';
 import type { Allocation, Solution, SolverInput, Strategy } from '../shared/contracts.js';
 import { audit, Conflict, context, getPlans, transaction } from './db.js';
+import { workspaceId } from './workspace.js';
 
 const solutionSchema = z.object({
   allocations: z.array(
@@ -161,8 +162,8 @@ export async function propose(db: PoolClient, strategy: Strategy) {
   const hash = planHash(ctx.scenario.id, strategy, ctx.snapshot, solution);
   await transaction(db, async () => {
     await db.query(
-      "INSERT INTO plans(id,scenario_id,strategy,snapshot,solution,hash,status) VALUES($1,$2,$3,$4,$5,$6,'proposed')",
-      [id, ctx.scenario.id, strategy, ctx.snapshot, solution, hash],
+      "INSERT INTO plans(id,scenario_id,strategy,snapshot,solution,hash,status,workspace_id) VALUES($1,$2,$3,$4,$5,$6,'proposed',$7)",
+      [id, ctx.scenario.id, strategy, ctx.snapshot, solution, hash, workspaceId()],
     );
     for (const [i, a] of solution.allocations.entries())
       await db.query('INSERT INTO actions(id,plan_id,ordinal,allocation) VALUES($1,$2,$3,$4)', [

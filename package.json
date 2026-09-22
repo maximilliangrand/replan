@@ -5,11 +5,14 @@
   "description": "Recover approved spare-parts transfers when the world changes mid-execution.",
   "type": "module",
   "engines": {
-    "node": ">=22.12"
+    "node": "^22.22.2 || ^24.15.0 || >=26.0.0"
   },
   "scripts": {
     "dev": "node scripts/dev.mjs",
     "start": "tsx src/server.ts",
+    "operator": "tsx scripts/operator.mts",
+    "workspace": "tsx scripts/workspace.mts",
+    "migrate": "tsx scripts/migrate.mts",
     "build": "tsc --noEmit && vite build",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
@@ -20,9 +23,12 @@
     "test:solver": "uv run --frozen --project solver python -m unittest discover -s solver/tests -v",
     "verify:export": "tsx src/replay.ts",
     "db:start": "node scripts/database.mjs start",
-    "db:stop": "node scripts/database.mjs stop"
+    "db:stop": "node scripts/database.mjs stop",
+    "backup:drill": "tsx scripts/backup-drill.mts"
   },
   "dependencies": {
+    "@fastify/cookie": "11.1.2",
+    "@fastify/rate-limit": "11.2.0",
     "@fastify/static": "10.1.4",
     "fastify": "5.12.5",
     "pg": "8.23.0",
@@ -31,10 +37,12 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@types/jsdom": "^30.0.0",
     "@types/node": "^24.0.0",
     "@types/pg": "^8.15.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "jsdom": "^30.1.1",
     "prettier": "3.8.1",
     "tsx": "^4.20.0",
     "typescript": "^5.9.0",

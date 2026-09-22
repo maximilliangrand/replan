@@ -8,7 +8,7 @@ A supplier delay threatens three factory repairs. Replan finds feasible spare-pa
 
 The interesting part comes next: the carrier commits a shipment but its reply disappears. Another customer consumes stock needed by the remaining plan. Replan reconciles the shipment, preserves completed work, rejects stale reservations, and asks for approval of a feasible replacement.
 
-**A synthetic operational application with real persistence, HTTP failures, and process restarts. No live shipments, customer data, API keys, or claimed production deployment.**
+**A synthetic operational application with real persistence, HTTP failures, and process restarts. No live shipments, customer data, or claimed production deployment.**
 
 ## Run it
 
@@ -22,7 +22,7 @@ docker compose up --build
 
 Open **http://127.0.0.1:4310**. The first build downloads Node and Python dependencies. PostgreSQL data survives service restarts. `docker compose down` stops services and retains the database volume.
 
-For local development, install **Node 22.12+**, **uv**, and **PostgreSQL 16+** with `initdb`, `pg_ctl`, `psql`, and `createdb` on PATH:
+For local development, install **Node 22.22.2+, 24.15+, or 26+**, **uv**, and **PostgreSQL 16+** with `initdb`, `pg_ctl`, `psql`, and `createdb` on PATH:
 
 ```sh
 npm run dev
@@ -31,6 +31,14 @@ npm run dev
 Open **http://127.0.0.1:4317**. The runner installs locked dependencies, prepares Python 3.12, creates its own PostgreSQL cluster under `.local/`, and starts the app and both simulators. It uses loopback ports 4310–4312, 4317 and 55432. It refuses to use an unrelated PostgreSQL server. Set `PG_BIN` if PostgreSQL tools are elsewhere; set `REPLAN_PG_PORT` to choose another free database port before first startup.
 
 Ctrl+C stops the application services. `npm run db:stop` stops this checkout's database. **Reset demo** starts a new synthetic scenario without deleting old commitments or audit history. Both launchers restart the application automatically after the injected crash.
+
+## Private pilot foundation
+
+Pilot mode adds provisioned operator identities, viewer/operator/admin roles, HTTPS browser sessions, workspace-bound operations and audit trails, and provider-confirmed cancellation. Demo reset and fault-injection routes are disabled. Dataset ownership must be assigned by an administrator before import; knowing another operation's ID does not grant access.
+
+[Deployment, migrations, access provisioning and recovery runbook →](docs/pilot-deployment.md)
+
+These controls are implemented and tested against independent synthetic providers. They do not establish compatibility with a real inventory or carrier system. The [validation gates](docs/pilot-validation.md) distinguish engineering evidence from the operational work still required.
 
 ## Try the difficult path
 
@@ -70,7 +78,7 @@ npm run test:solver
 npm run evaluate
 ```
 
-Tests use dedicated `*_test` databases. To use your own PostgreSQL, set `TEST_DATABASE_URL`, `TEST_INVENTORY_DATABASE_URL`, and `TEST_CARRIER_DATABASE_URL` to three dedicated test databases. They must not point to production data.
+Tests use dedicated `*_test` databases. To use your own PostgreSQL, set `TEST_DATABASE_URL`, `TEST_INVENTORY_DATABASE_URL`, `TEST_CARRIER_DATABASE_URL`, `TEST_AUTH_DATABASE_URL`, and `TEST_PILOT_DATABASE_URL` to five dedicated test databases. They must not point to production data.
 
 The solver tests include 64 small instances checked against an independent exhaustive oracle. The published benchmark contains 27 authored synthetic cases, including infeasible demand. Optimization allocates 70 orders versus 53 for greedy, with priority 620 versus 512 and **higher** total cost ($1,881 versus $1,582). Neither strategy violates the checked constraints. These are finite synthetic results, not independently validated operational gains. [Method, limitations and raw results →](docs/evaluation.md)
 
@@ -101,7 +109,7 @@ flowchart LR
 - [Evaluation methodology](docs/evaluation.md)
 - [Validation record](docs/validation.md)
 
-This is deliberately one operation and one operator. It has no authentication, multi-tenant permissions, real carrier integration, delivery tracking, reservation leases, or production retention policy. Keep it on loopback. Local services share an administrative PostgreSQL role; separate databases demonstrate state ownership, not a hardened security boundary. The included costs, travel times and priorities are authored assumptions. No LLM participates in planning or authorization, so the core behavior is reproducible without a model provider.
+Each workspace has one current operation, with independent execution locks and authenticated roles in pilot mode. Workspace filtering is enforced in the application; this is not database row-level security or a claim of hostile-tenant certification. There is no real carrier integration, delivery tracking, reservation lease, or production retention policy. The default demo remains loopback-only. Its local services share an administrative PostgreSQL role; pilot deployment has separate migration and runtime credentials. The included costs, travel times and priorities are authored assumptions. No LLM participates in planning or authorization, so the core behavior is reproducible without a model provider.
 
 The next useful validation is an operations practitioner attempting the acceptance drill and challenging those assumptions. There has been no customer pilot. See [the product brief](docs/product-brief.md) for the questions that should determine further development.
 

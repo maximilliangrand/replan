@@ -1,0 +1,128 @@
+name: replan-pilot
+
+x-app-environment: &app-environment
+  REPLAN_MODE: pilot
+  NODE_ENV: production
+  HOST: 0.0.0.0
+  PORT: '4310'
+  APP_ORIGIN: ${APP_ORIGIN:?Set the exact https origin without a trailing slash}
+  DATABASE_URL: ${DATABASE_URL:?Set the runtime application database URL}
+  INVENTORY_URL: ${INVENTORY_URL:?Set the inventory adapter URL}
+  CARRIER_URL: ${CARRIER_URL:?Set the carrier adapter URL}
+  PROVIDER_TOKEN: ${PROVIDER_TOKEN:?Set a random service credential of at least 32 characters}
+  MIGRATE_ON_START: 'false'
+  UV_NO_SYNC: '1'
+  UV_CACHE_DIR: /tmp/uv
+  PYTHONDONTWRITEBYTECODE: '1'
+
+services:
+  replan:
+    build: .
+    image: ${REPLAN_IMAGE:-replan-pilot:local}
+    environment: *app-environment
+    restart: unless-stopped
+    init: true
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    healthcheck:
+      test:
+        [
+          CMD,
+          node,
+          -e,
+          "require('node:http').get('http://127.0.0.1:4310/api/ready',{headers:{host:new URL(process.env.APP_ORIGIN).host}},r=>{r.resume();process.exit(r.statusCode===200?0:1)}).on('error',()=>process.exit(1))",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    stop_grace_period: 40s
+
+  ingress:
+    image: caddy:2.11.4-alpine
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN:?Set the domain from APP_ORIGIN without https or a path}
+      ACME_EMAIL: ${ACME_EMAIL:?Set a certificate contact email}
+      PILOT_ALLOWED_CIDRS: ${PILOT_ALLOWED_CIDRS:?Set explicit office or VPN public IP ranges}
+    ports: ['80:80', '443:443']
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      replan: { condition: service_healthy }
+    restart: unless-stopped
+    security_opt: [no-new-privileges:true]
+
+  migrate:
+    image: ${REPLAN_IMAGE:-replan-pilot:local}
+    profiles: [tools]
+    command: [node, --import, tsx, scripts/migrate.mts]
+    environment:
+      <<: *app-environment
+      DATABASE_URL: ${MIGRATION_DATABASE_URL:?Set a separate schema-owner database URL}
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+
+  # Optional private validation services. These are simulators, not live adapters.
+  inventory:
+    image: ${REPLAN_IMAGE:-replan-pilot:local}
+    profiles: [simulation]
+    command: [node, --import, tsx, deploy/simulator.mts, inventory]
+    environment:
+      HOST: 0.0.0.0
+      REPLAN_MODE: pilot
+      SIMULATOR_TOKEN: ${PROVIDER_TOKEN}
+      INVENTORY_DATABASE_URL: ${INVENTORY_DATABASE_URL:-}
+    restart: unless-stopped
+    init: true
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    healthcheck:
+      test:
+        [
+          CMD,
+          node,
+          -e,
+          "fetch('http://127.0.0.1:4311/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  carrier:
+    image: ${REPLAN_IMAGE:-replan-pilot:local}
+    profiles: [simulation]
+    command: [node, --import, tsx, deploy/simulator.mts, carrier]
+    environment:
+      HOST: 0.0.0.0
+      REPLAN_MODE: pilot
+      SIMULATOR_TOKEN: ${PROVIDER_TOKEN}
+      CARRIER_DATABASE_URL: ${CARRIER_DATABASE_URL:-}
+    restart: unless-stopped
+    init: true
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    healthcheck:
+      test:
+        [
+          CMD,
+          node,
+          -e,
+          "fetch('http://127.0.0.1:4312/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  caddy_data:
+  caddy_config:

@@ -88,6 +88,18 @@ class SolverTests(unittest.TestCase):
                 self.assertEqual(["o1"], result["unfilled"])
                 self.assertEqual([], violations(request, result))
 
+    def test_large_provider_version_is_preserved_without_changing_the_plan(self):
+        for strategy in ("greedy", "optimized"):
+            with self.subTest(strategy=strategy):
+                request = self.request(strategy=strategy)
+                request["stock"][0]["version"] = 1_000_001
+                result = solve(request)
+                self.assertEqual(1_000_001, result["allocations"][0]["stockVersion"])
+                self.assertEqual([], violations(request, result))
+                request["stock"][0]["version"] = 2_000_000_001
+                with self.assertRaisesRegex(ValueError, "version"):
+                    solve(request)
+
     def test_deadline_equality_is_feasible(self):
         result = solve(self.request(orders=[order("o1", "f1", deadline=4)]))
         self.assertEqual([], result["unfilled"])

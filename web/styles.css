@@ -2282,6 +2282,128 @@ pre {
 .plan-detail-heading > .status {
   font-size: 11px;
 }
+.operator-identity {
+  display: grid;
+  gap: 3px;
+  font-size: 12px;
+  text-align: right;
+}
+.operator-identity span {
+  color: var(--ink-soft);
+  font-size: 10px;
+  overflow-wrap: anywhere;
+  max-width: 220px;
+}
+.access-screen {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 32px 20px;
+}
+.access-panel {
+  width: min(100%, 470px);
+  padding: 36px;
+}
+.access-brand {
+  display: block;
+  width: fit-content;
+  margin-bottom: 36px;
+  color: inherit;
+  font-size: 30px;
+  font-weight: 750;
+  text-decoration: none;
+  letter-spacing: -1.5px;
+}
+.access-panel h1 {
+  font-size: 28px;
+  line-height: 1.2;
+  margin: 12px 0 16px;
+  letter-spacing: -1px;
+}
+.access-panel form,
+.cancellation-block form {
+  display: grid;
+  gap: 12px;
+  margin-top: 24px;
+}
+.access-panel label,
+.cancellation-block label {
+  font-size: 13px;
+  font-weight: 600;
+}
+.access-panel input,
+.cancellation-block textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--paper);
+  color: inherit;
+  font: inherit;
+  padding: 12px;
+}
+.access-panel input:focus-visible,
+.cancellation-block textarea:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+}
+.access-footnote {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  margin-top: 20px;
+}
+.session-message {
+  padding: 12px 24px;
+  background: #fff2d5;
+  color: #6f4e11;
+  font-size: 13px;
+}
+.session-message p {
+  margin: 4px 0;
+}
+.cancellation-block {
+  margin: 20px 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.cancellation-block summary {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+}
+.cancellation-block p {
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--ink-soft);
+}
+.cancellation-block textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+.cancellation-block .button {
+  justify-self: start;
+}
+@media (max-width: 760px) {
+  .pilot-header {
+    height: auto;
+    min-height: 83px;
+    padding-block: 15px;
+    flex-wrap: wrap;
+  }
+  .pilot-header .header-actions {
+    flex: 1 1 auto;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .operator-identity {
+    text-align: left;
+  }
+  .access-panel {
+    padding: 24px;
+  }
+}
 @media (max-width: 520px) {
   .hero p {
     font-size: 12px;

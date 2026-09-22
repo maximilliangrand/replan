@@ -96,6 +96,8 @@ export async function startDatabase() {
     'replan_test',
     'replan_inventory_test',
     'replan_carrier_test',
+    'replan_auth_test',
+    'replan_pilot_test',
   ]) {
     const present = run('psql', [
       '-h',
