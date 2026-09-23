@@ -4,7 +4,7 @@ permissions:
   contents: read
 jobs:
   contracts-and-recovery:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     services:
       postgres:
@@ -25,6 +25,7 @@ jobs:
       TEST_PILOT_DATABASE_URL: postgres://replan:replan-ci@127.0.0.1:5432/replan_pilot_test
       BACKUP_ADMIN_DATABASE_URL: postgres://replan:replan-ci@127.0.0.1:5432/replan_test
       PGPASSWORD: replan-ci
+      PG_BIN: /usr/lib/postgresql/16/bin
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4

@@ -69,6 +69,7 @@ export async function checkOperations(options: {
   };
   const replies = await Promise.allSettled([
     fetch(`${options.origin}/api/ready`, {
+      headers: { authorization: `Bearer ${options.key}` },
       redirect: 'error',
       signal: AbortSignal.timeout(options.timeoutMs),
     }),

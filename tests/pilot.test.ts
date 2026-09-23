@@ -1,4 +1,4 @@
-import { spawn, type ChildProcess } from 'node:child_process';
+import { spawn, spawnSync, type ChildProcess } from 'node:child_process';
 import { randomBytes, randomUUID } from 'node:crypto';
 import { once } from 'node:events';
 import { readFile } from 'node:fs/promises';
@@ -37,6 +37,7 @@ let runtimeRoleCreated = false;
 let restorePublicCreate = false;
 const token = randomBytes(32).toString('hex');
 const origin = 'https://pilot.example';
+const healthcheckHostname = 'healthcheck.railway.app';
 type Actor = { principal: Principal; key: string };
 type Dataset = ReturnType<typeof makeScenario>;
 let adminA: Actor;
@@ -65,6 +66,7 @@ async function raw(
   actor?: Actor,
   body?: unknown,
   headers: Record<string, string> = {},
+  method?: string,
 ) {
   // Node's native fetch may replace Host. Model the TLS ingress explicitly,
   // retaining the configured public host while connecting to the loopback app.
@@ -72,7 +74,7 @@ async function raw(
     const request = httpRequest(
       `${base}/api${path}`,
       {
-        method: body === undefined ? 'GET' : 'POST',
+        method: method ?? (body === undefined ? 'GET' : 'POST'),
         headers: {
           host: 'pilot.example',
           'content-type': 'application/json',
@@ -139,7 +141,11 @@ async function seed(dataset: Dataset, workspaceId: string) {
 async function importOperation(actor: Actor, dataset: Dataset) {
   return call('/operations', actor, { scenario: dataset.scenario });
 }
-async function start(connectionString = databaseUrl, migrateOnStart = true) {
+async function start(
+  connectionString = databaseUrl,
+  migrateOnStart = true,
+  extraHealthcheckHostname?: string,
+) {
   const port = await freePort();
   base = `http://127.0.0.1:${port}`;
   child = spawn(process.execPath, ['--import', 'tsx', 'src/server.ts'], {
@@ -147,6 +153,8 @@ async function start(connectionString = databaseUrl, migrateOnStart = true) {
       ...process.env,
       REPLAN_MODE: 'pilot',
       APP_ORIGIN: origin,
+      REPLAN_SYNTHETIC_PROVIDERS: 'true',
+      HEALTHCHECK_HOSTNAME: extraHealthcheckHostname,
       PROVIDER_TOKEN: token,
       HOST: '127.0.0.1',
       PORT: String(port),
@@ -234,9 +242,12 @@ beforeAll(async () => {
   carrierUrl = await carrier.listen({ host: '127.0.0.1', port: 0 });
   // Schema migration is an owner job; the deployed application only verifies it.
   await start();
+  expect((await raw('/ready', undefined, undefined, { host: healthcheckHostname })).status).toBe(
+    403,
+  );
   await stop();
   await configureRuntimeRole();
-  await start(runtimeUrl.toString(), false);
+  await start(runtimeUrl.toString(), false, healthcheckHostname);
 });
 beforeEach(async () => {
   // Every test owns fresh workspace and provider epochs. No shared data is reset.
@@ -275,6 +286,98 @@ afterAll(async () => {
 });
 
 describe('private pilot HTTP boundary', () => {
+  it.each([
+    [undefined, false],
+    ['false', false],
+    ['true', true],
+  ] as const)('parses the explicit synthetic-provider flag (%s)', (value, expected) => {
+    const result = spawnSync(
+      process.execPath,
+      [
+        '--import',
+        'tsx',
+        '--input-type=module',
+        '-e',
+        "const { config } = await import('./src/config.ts'); console.log(config.syntheticProviders)",
+      ],
+      {
+        env: {
+          ...process.env,
+          NODE_ENV: 'test',
+          REPLAN_MODE: 'demo',
+          HEALTHCHECK_HOSTNAME: undefined,
+          REPLAN_SYNTHETIC_PROVIDERS: value,
+        },
+        encoding: 'utf8',
+        timeout: 5000,
+      },
+    );
+    expect(result.status).toBe(0);
+    expect(result.stdout.trim()).toBe(String(expected));
+  });
+
+  it.each(['', '1', 'yes', 'FALSE'])(
+    'refuses an ambiguous synthetic-provider flag (%s)',
+    (value) => {
+      const result = spawnSync(process.execPath, ['--import', 'tsx', 'src/config.ts'], {
+        env: {
+          ...process.env,
+          NODE_ENV: 'test',
+          REPLAN_MODE: 'demo',
+          REPLAN_SYNTHETIC_PROVIDERS: value,
+        },
+        encoding: 'utf8',
+        timeout: 5000,
+      });
+      expect(result.status).toBe(1);
+      expect(result.stderr).toContain('REPLAN_SYNTHETIC_PROVIDERS must be true or false');
+    },
+  );
+
+  it('accepts the configured healthcheck hostname only for the exact readiness GET', async () => {
+    const headers = { host: healthcheckHostname };
+    expect((await raw('/ready', undefined, undefined, headers)).status).toBe(200);
+    for (const path of [
+      '/health',
+      '/session',
+      '/state',
+      '/operations/health',
+      '/ready/',
+      '/ready?probe=1',
+    ])
+      expect((await raw(path, adminA, undefined, headers)).status).toBe(403);
+    expect((await raw('/ready', adminA, {}, headers)).status).toBe(403);
+    expect((await raw('/ready', undefined, undefined, headers, 'HEAD')).status).toBe(403);
+    expect((await raw('/auth/login', undefined, { key: adminA.key }, headers)).status).toBe(403);
+    for (const host of [
+      'untrusted.example',
+      `other.${healthcheckHostname}`,
+      `${healthcheckHostname}.evil.example`,
+      `${healthcheckHostname}:80`,
+    ])
+      expect((await raw('/ready', undefined, undefined, { host })).status).toBe(403);
+    // The canonical host keeps its normal routes and authentication boundary.
+    expect((await raw('/ready')).status).toBe(200);
+    expect((await raw('/health')).status).toBe(200);
+    expect((await raw('/state')).status).toBe(401);
+  });
+
+  it.each([
+    '',
+    '*.railway.app',
+    'https://healthcheck.railway.app',
+    'healthcheck.railway.app:443',
+    'healthcheck.railway.app/path',
+  ])('refuses an invalid additional healthcheck hostname (%s)', (hostname) => {
+    const result = spawnSync(process.execPath, ['--import', 'tsx', 'src/config.ts'], {
+      env: { ...process.env, REPLAN_MODE: 'pilot', HEALTHCHECK_HOSTNAME: hostname },
+      encoding: 'utf8',
+      timeout: 5000,
+    });
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain('HEALTHCHECK_HOSTNAME must be a single DNS hostname');
+  });
+
   it('exposes only authenticated own-workspace operational summaries', async () => {
     const id = randomUUID();
     await db.query(
@@ -317,6 +420,7 @@ describe('private pilot HTTP boundary', () => {
     expect(imported.runtime).toEqual({
       mode: 'pilot',
       demoControls: false,
+      syntheticProviders: true,
       workspaceId: adminA.principal.workspaceId,
     });
     expect(imported.world).toBeNull();
@@ -541,6 +645,9 @@ describe('private pilot HTTP boundary', () => {
     await carrier.close();
     try {
       await call('/ready', undefined, undefined, 503);
+      expect(
+        (await raw('/ready', undefined, undefined, { host: healthcheckHostname })).status,
+      ).toBe(503);
       const health = await call<{ ok: boolean }>('/health');
       expect(health.ok).toBe(true);
       expect((await call('/state', viewerA)).scenario.id).toBe(datasetA.scenario.id);

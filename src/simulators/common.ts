@@ -19,13 +19,21 @@ export class ServiceError extends Error {
 
 export interface ServiceOptions {
   token?: string;
+  allowedHostname?: string;
 }
 
 export function service(databaseURL: string, options: ServiceOptions = {}) {
+  const allowed = new Set(['localhost', '127.0.0.1', '[::1]', 'inventory', 'carrier']);
+  if (options.allowedHostname !== undefined) {
+    if (!z.hostname().safeParse(options.allowedHostname).success)
+      throw new Error(
+        'SIMULATOR_HOSTNAME must be a single DNS hostname without a scheme, port or wildcard.',
+      );
+    allowed.add(options.allowedHostname.toLowerCase());
+  }
   const pool = new Pool({ connectionString: databaseURL, max: 8 });
   const app = Fastify({ logger: false, bodyLimit: 256 * 1024 });
   app.addHook('onRequest', async (request, reply) => {
-    const allowed = new Set(['localhost', '127.0.0.1', '[::1]', 'inventory', 'carrier']);
     try {
       if (!allowed.has(new URL(`http://${request.headers.host}`).hostname))
         throw new Error('untrusted host');
@@ -35,7 +43,7 @@ export function service(databaseURL: string, options: ServiceOptions = {}) {
       )
         throw new Error('untrusted origin');
     } catch {
-      return reply.code(403).send({ error: 'Simulator access is restricted to the local demo.' });
+      return reply.code(403).send({ error: 'Unexpected simulator host or origin.' });
     }
     // Hash both values to fixed-size buffers before comparison; do not expose a
     // token-length-dependent comparison or put credentials in logs/errors.

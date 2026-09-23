@@ -1201,6 +1201,12 @@ export function Workbench({
             <span className="ribbon-end">{session.principal?.workspaceId}</span>
           </div>
         )}
+        {session.mode === 'pilot' && state?.runtime?.syntheticProviders && (
+          <div className="notice-banner" role="note" aria-label="Provider environment">
+            <Icon name="box" />
+            <span>Simulated inventory and carrier. No real shipments.</span>
+          </div>
+        )}
         {error && (
           <div className="notice-banner error" role="alert">
             <Icon name="warning" />

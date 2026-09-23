@@ -135,7 +135,12 @@ export interface World {
   carrierLookupAvailable: boolean;
 }
 export interface AppState {
-  runtime?: { mode: 'demo' | 'pilot'; demoControls: boolean; workspaceId: string };
+  runtime?: {
+    mode: 'demo' | 'pilot';
+    demoControls: boolean;
+    workspaceId: string;
+    syntheticProviders?: boolean;
+  };
   scenario: Scenario;
   snapshot: Snapshot;
   plans: Plan[];
