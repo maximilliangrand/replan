@@ -35,14 +35,20 @@ may still commit. It does not invent certainty to keep the screen green.
 the first. Replanning excludes confirmed orders, accounts for consumed capacity
 and exposes the cost of the remaining work separately from committed cost.
 
-## The smallest useful product
+## The implemented slice
 
-The MVP is one local operations workbench with three repairs, observed inventory,
+The demonstration is one operations workbench with three repairs, observed inventory,
 two planning strategies, exact approval, durable execution, fault controls and an
 exportable decision trail. It demonstrates one difficult slice end to end rather
 than a general logistics platform. Its external services are independently
-stateful simulators. There is no claim of a live pilot, customer deployment,
-delivery tracking or measured reduction in factory downtime.
+stateful simulators.
+
+Authenticated pilot mode adds operator identities, viewer/operator/admin roles,
+workspace-scoped operations, provider-confirmed cancellation and a read-only
+monitoring probe. Fault controls stay in the local demo. A temporary hosted
+deployment passed [acceptance checks](railway-acceptance.md), then was
+intentionally taken offline on 2026-09-23. There is no live carrier integration,
+customer deployment, delivery tracking or measured reduction in factory downtime.
 
 The immediate user is a single repair planner; the second user is a reviewer who
 must verify why a commitment occurred. The interface gives each a concrete job:
@@ -87,10 +93,15 @@ stock changes between review and reservation, and what evidence lets someone
 resolve an ambiguous carrier outcome. Collect representative anonymized workloads
 and evaluate both strategies using the same constraints.
 
-A real pilot would need authenticated approvals, tenant and role boundaries,
-verified provider idempotency and reconciliation guarantees, operational
-monitoring, reservation expiry/cancellation rules and a staffed manual-resolution
-path. Only then would it make sense to measure repair completion, expedite cost,
-time spent investigating uncertainty and avoidable duplicate commitments.
-Those outcomes, rather than the number of generated plans, should determine
-whether the product deserves broader scope.
+Authenticated approvals, application-enforced workspace and role boundaries,
+cancellation, and monitoring already have [engineering evidence](pilot-validation.md).
+A real operational pilot still needs verified provider idempotency and
+reconciliation guarantees, agreement on reservation expiry and cancellation,
+tested alert delivery, and a staffed resolution path for effects that cannot be
+confirmed automatically. The [provider assessment](provider-assessment.md)
+explains why the simulator contracts are not interchangeable with vendor APIs.
+
+With those conditions established, measure repair completion, expedite cost,
+time spent investigating uncertainty and avoidable duplicate commitments. Those
+outcomes, rather than the number of generated plans, should determine whether
+the product deserves broader scope.

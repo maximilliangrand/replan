@@ -1,14 +1,18 @@
 # Replan
 
-**Recover an approved operation when the world changes halfway through it.**
+**An HTTP timeout does not tell you whether a shipment succeeded.**
 
 [![verify](https://github.com/maximilliangrand/replan/actions/workflows/ci.yml/badge.svg)](https://github.com/maximilliangrand/replan/actions/workflows/ci.yml)
 
-A supplier delay threatens three factory repairs. Replan finds feasible spare-part transfers, asks an operator to approve the tradeoffs, then executes against independently stateful inventory and carrier services.
+Replan recovers approved spare-part transfers when a carrier commits a shipment but its reply disappears, or stock changes before the remaining work begins. It reconciles external receipts, preserves completed transfers, and requires new approval for a changed plan.
 
-The interesting part comes next: the carrier commits a shipment but its reply disappears. Another customer consumes stock needed by the remaining plan. Replan reconciles the shipment, preserves completed work, rejects stale reservations, and asks for approval of a feasible replacement.
+[![Replan operations workbench](docs/media/replan-workbench.png)](https://github.com/maximilliangrand/replan/releases/download/v0.2.0/replan-recovery-demo.mp4)
 
-**A synthetic operational application with real persistence, HTTP failures, and process restarts. A temporary private Railway pilot was tested, then intentionally taken offline on 2026-09-23. Inventory and carrier execution remain simulated. No live shipments or customer data.**
+[Watch the captioned 90-second demo (MP4)](https://github.com/maximilliangrand/replan/releases/download/v0.2.0/replan-recovery-demo.mp4) · [Read the technical case study](docs/case-study.md) · [Run locally](#run-it) · [Inspect the demo audit](docs/evidence/launch-demo-recovery.json)
+
+The recording follows three repair orders through a lost carrier response, unavailable lookup, changed inventory, and a separately approved replacement. The final result is three distinct dispatches and **$615 committed cost**, including the first shipment. The disruption's extra cost stays visible.
+
+**Synthetic providers; real PostgreSQL persistence, HTTP failures and process-restart tests.** There are no live shipments, real carrier integrations or customer data. A temporary Railway deployment was tested and intentionally taken offline on 2026-09-23; the [hosted acceptance record](docs/railway-acceptance.md) preserves its results.
 
 ## Run it
 
@@ -106,6 +110,7 @@ flowchart LR
 ```
 
 - [Architecture and failure semantics](docs/architecture.md)
+- [Technical case study](docs/case-study.md)
 - [Product brief and independent reviewer drill](docs/product-brief.md)
 - [Five-minute demonstration](docs/demo.md)
 - [Evaluation methodology](docs/evaluation.md)
