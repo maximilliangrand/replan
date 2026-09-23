@@ -8,7 +8,7 @@ A supplier delay threatens three factory repairs. Replan finds feasible spare-pa
 
 The interesting part comes next: the carrier commits a shipment but its reply disappears. Another customer consumes stock needed by the remaining plan. Replan reconciles the shipment, preserves completed work, rejects stale reservations, and asks for approval of a feasible replacement.
 
-**A synthetic operational application with real persistence, HTTP failures, and process restarts. No live shipments, customer data, or claimed production deployment.**
+**A synthetic operational application with real persistence, HTTP failures, and process restarts. A private Railway pilot is deployed; inventory and carrier execution remain simulated. No live shipments or customer data.**
 
 ## Run it
 
@@ -37,6 +37,8 @@ Ctrl+C stops the application services. `npm run db:stop` stops this checkout's d
 Pilot mode adds provisioned operator identities, viewer/operator/admin roles, HTTPS browser sessions, workspace-bound operations and audit trails, and provider-confirmed cancellation. Demo reset and fault-injection routes are disabled. Dataset ownership must be assigned by an administrator before import; knowing another operation's ID does not grant access.
 
 [Deployment, migrations, access provisioning and recovery runbook →](docs/pilot-deployment.md)
+
+[Railway deployment profile →](docs/railway-deployment.md) · [Hosted acceptance evidence →](docs/railway-acceptance.md)
 
 These controls are implemented and tested against independent synthetic providers. They do not establish compatibility with a real inventory or carrier system. The [validation gates](docs/pilot-validation.md) distinguish engineering evidence from the operational work still required.
 

@@ -4,6 +4,9 @@ This profile runs the authenticated pilot on Railway with **synthetic inventory
 and carrier providers**. Hosting the application does not establish real shipment
 execution. The interface explicitly identifies the simulated providers.
 
+See the [2026-09-23 hosted acceptance record](railway-acceptance.md) for the
+actual deployment, recovery and backup checks.
+
 ## Runtime boundary
 
 - One application replica, two private provider services and PostgreSQL 16 in
@@ -78,6 +81,12 @@ Each provider uses its own database credential, `SIMULATOR_TOKEN`, `HOST=::`
 and `SIMULATOR_HOSTNAME` equal to its exact private Railway hostname. Hostname
 configuration does not bypass token authentication, including on `/health`.
 Provider services must remain private.
+
+Railway allocates private DNS when each service is first deployed. Verify the
+allocated endpoints before starting dependent services, then set the exact
+provider hostnames and URLs. An unresolved service reference must not be treated
+as a ready dependency. Initialize the database before starting the application;
+its runtime role cannot bootstrap its own schema.
 
 ## Monitoring and operation
 
