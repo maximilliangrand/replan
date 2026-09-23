@@ -72,7 +72,7 @@ solver uses the environment built into the image rather than installing packages
 at runtime. Keep a single application replica for this first pilot.
 
 `GET /api/health` is process liveness. `GET /api/ready` also checks the database and
-both providers. The internal probe supplies the canonical Host header. Neither
+both providers using the configured service credential. The internal probe supplies the canonical Host header. Neither
 endpoint reveals credentials or workspace data. Monitor readiness failures,
 HTTP 5xx, database/connection exhaustion, expired certificates and operations
 remaining uncertain. A failed readiness probe does not automatically restart a

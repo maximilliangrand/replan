@@ -108,6 +108,10 @@ flowchart LR
 - [Five-minute demonstration](docs/demo.md)
 - [Evaluation methodology](docs/evaluation.md)
 - [Validation record](docs/validation.md)
+- [HTTPS browser acceptance](docs/browser-acceptance.md)
+- [Measured capacity acceptance](docs/capacity.md)
+- [Operational monitoring](docs/operations.md)
+- [Real-provider compatibility assessment](docs/provider-assessment.md)
 
 Each workspace has one current operation, with independent execution locks and authenticated roles in pilot mode. Workspace filtering is enforced in the application; this is not database row-level security or a claim of hostile-tenant certification. There is no real carrier integration, delivery tracking, reservation lease, or production retention policy. The default demo remains loopback-only. Its local services share an administrative PostgreSQL role; pilot deployment has separate migration and runtime credentials. The included costs, travel times and priorities are authored assumptions. No LLM participates in planning or authorization, so the core behavior is reproducible without a model provider.
 

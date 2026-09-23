@@ -809,7 +809,7 @@ describe('simulator service authentication', () => {
   );
 
   it.each(['carrier', 'inventory'] as const)(
-    '%s authenticates all data routes while keeping database-checked health public',
+    '%s authenticates data and health checks with the currently provisioned credential',
     async (kind) => {
       const token = 'test-only-service-token';
       const app =
@@ -820,7 +820,7 @@ describe('simulator service authentication', () => {
         const id = randomUUID();
         scenarios.push(id);
         const payload = kind === 'carrier' ? { scenarioId: id } : { scenarioId: id, stock: [] };
-        expect((await app.inject('/health')).json()).toEqual({ ok: true });
+        expect((await app.inject('/health')).statusCode).toBe(401);
         for (const authorization of [
           undefined,
           'Bearer wrong',
@@ -828,6 +828,9 @@ describe('simulator service authentication', () => {
           'Bearer test-only-service-toke',
         ]) {
           const headers = authorization ? { authorization } : {};
+          expect((await app.inject({ method: 'GET', url: '/health', headers })).statusCode).toBe(
+            401,
+          );
           expect(
             (await app.inject({ method: 'POST', url: '/scenarios', payload, headers })).statusCode,
           ).toBe(401);
@@ -836,6 +839,9 @@ describe('simulator service authentication', () => {
           ).toBe(401);
         }
         const headers = { authorization: `Bearer ${token}` };
+        expect((await app.inject({ method: 'GET', url: '/health', headers })).json()).toEqual({
+          ok: true,
+        });
         expect(
           (await app.inject({ method: 'POST', url: '/scenarios', payload, headers })).statusCode,
         ).toBe(201);

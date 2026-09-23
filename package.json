@@ -24,7 +24,10 @@
     "verify:export": "tsx src/replay.ts",
     "db:start": "node scripts/database.mjs start",
     "db:stop": "node scripts/database.mjs stop",
-    "backup:drill": "tsx scripts/backup-drill.mts"
+    "backup:drill": "tsx scripts/backup-drill.mts",
+    "test:browser": "npm run build && playwright test",
+    "check:operations": "tsx scripts/check-operations.mts",
+    "test:capacity": "tsx scripts/capacity.mts"
   },
   "dependencies": {
     "@fastify/cookie": "11.1.2",
@@ -37,6 +40,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@playwright/test": "1.63.0",
     "@types/jsdom": "^30.0.0",
     "@types/node": "^24.0.0",
     "@types/pg": "^8.15.0",
