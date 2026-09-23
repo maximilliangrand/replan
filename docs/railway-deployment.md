@@ -1,11 +1,13 @@
 # Railway hosted pilot
 
-This profile runs the authenticated pilot on Railway with **synthetic inventory
+This reusable profile runs the authenticated pilot on Railway with **synthetic inventory
 and carrier providers**. Hosting the application does not establish real shipment
 execution. The interface explicitly identifies the simulated providers.
 
 See the [2026-09-23 hosted acceptance record](railway-acceptance.md) for the
-actual deployment, recovery and backup checks.
+temporary deployment, recovery and backup checks.
+That test deployment was intentionally taken offline on 2026-09-23; this recipe
+is preserved for future deployments.
 
 ## Runtime boundary
 
