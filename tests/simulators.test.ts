@@ -791,6 +791,29 @@ describe('terminal cancellation', () => {
 
 describe('simulator service authentication', () => {
   it.each(['carrier', 'inventory'] as const)(
+    '%s requires explicit opt-in for private service hostnames',
+    async (kind) => {
+      const app = kind === 'carrier' ? carrier : inventory;
+      expect(
+        (await app.inject({ url: '/health', headers: { host: `${kind}.railway.internal` } }))
+          .statusCode,
+      ).toBe(403);
+    },
+  );
+
+  it.each([
+    '',
+    '*.railway.internal',
+    'https://inventory.railway.internal',
+    'inventory.railway.internal:4311',
+    'inventory.railway.internal/path',
+  ])('refuses an invalid configured simulator hostname (%s)', async (allowedHostname) => {
+    await expect(createInventory(inventoryURL, { allowedHostname })).rejects.toThrow(
+      'SIMULATOR_HOSTNAME must be a single DNS hostname',
+    );
+  });
+
+  it.each(['carrier', 'inventory'] as const)(
     '%s refuses pilot startup without a service token',
     (kind) => {
       const result = spawnSync(
@@ -812,10 +835,11 @@ describe('simulator service authentication', () => {
     '%s authenticates data and health checks with the currently provisioned credential',
     async (kind) => {
       const token = 'test-only-service-token';
+      const allowedHostname = `${kind}.railway.internal`;
       const app =
         kind === 'carrier'
-          ? await createCarrier(carrierURL, { token })
-          : await createInventory(inventoryURL, { token });
+          ? await createCarrier(carrierURL, { token, allowedHostname })
+          : await createInventory(inventoryURL, { token, allowedHostname });
       try {
         const id = randomUUID();
         scenarios.push(id);
@@ -827,7 +851,7 @@ describe('simulator service authentication', () => {
           'Basic test-only-service-token',
           'Bearer test-only-service-toke',
         ]) {
-          const headers = authorization ? { authorization } : {};
+          const headers = { host: allowedHostname, ...(authorization ? { authorization } : {}) };
           expect((await app.inject({ method: 'GET', url: '/health', headers })).statusCode).toBe(
             401,
           );
@@ -838,7 +862,34 @@ describe('simulator service authentication', () => {
             (await app.inject({ method: 'GET', url: `/scenarios/${id}`, headers })).statusCode,
           ).toBe(401);
         }
-        const headers = { authorization: `Bearer ${token}` };
+        const headers = { host: allowedHostname, authorization: `Bearer ${token}` };
+        for (const host of [
+          'untrusted.example',
+          `other.${allowedHostname}`,
+          `${allowedHostname}.evil.example`,
+        ]) {
+          expect(
+            (await app.inject({ url: '/health', headers: { ...headers, host } })).statusCode,
+          ).toBe(403);
+          expect(
+            (
+              await app.inject({
+                method: 'POST',
+                url: '/scenarios',
+                payload,
+                headers: { ...headers, host },
+              })
+            ).statusCode,
+          ).toBe(403);
+        }
+        expect(
+          (
+            await app.inject({
+              url: '/health',
+              headers: { ...headers, origin: 'https://untrusted.example' },
+            })
+          ).statusCode,
+        ).toBe(403);
         expect((await app.inject({ method: 'GET', url: '/health', headers })).json()).toEqual({
           ok: true,
         });

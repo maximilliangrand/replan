@@ -383,6 +383,39 @@ describe('private pilot workbench', () => {
     expect(container.textContent).not.toContain('Reset demo');
   });
 
+  it('discloses simulated providers without changing pilot identity or operator controls', async () => {
+    const synthetic = state();
+    synthetic.runtime!.syntheticProviders = true;
+    fetchMock.mockImplementation(async (url) =>
+      reply(url === '/api/session' ? operator : synthetic),
+    );
+    await mount();
+    expect(
+      container.querySelector('[role="note"][aria-label="Provider environment"]')?.textContent,
+    ).toBe('Simulated inventory and carrier. No real shipments.');
+    expect(container.textContent).toContain('PRIVATE PILOT');
+    expect(container.textContent).toContain('Alex');
+    expect(button('Dispatch one').disabled).toBe(false);
+    expect(button('Sign out').disabled).toBe(false);
+    expect(container.textContent).not.toContain('PUBLIC DEMO');
+    expect(container.textContent).not.toContain('Reset demo');
+  });
+
+  it.each([false, undefined])(
+    'does not invent a simulated-provider disclosure when the flag is %s',
+    async (syntheticProviders) => {
+      const current = state();
+      if (syntheticProviders !== undefined)
+        current.runtime!.syntheticProviders = syntheticProviders;
+      fetchMock.mockImplementation(async (url) =>
+        reply(url === '/api/session' ? operator : current),
+      );
+      await mount();
+      expect(container.querySelector('[aria-label="Provider environment"]')).toBeNull();
+      expect(button('Dispatch one').disabled).toBe(false);
+    },
+  );
+
   it('preserves public demo controls when the server explicitly enables demo mode', async () => {
     const demo = state();
     demo.runtime = { mode: 'demo', demoControls: true, workspaceId: 'demo' };

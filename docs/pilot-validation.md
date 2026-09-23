@@ -32,15 +32,15 @@ Choose one workflow owner, inventory system and carrier. Record their supported 
 
 The adapter is trusted to attest these guarantees. The offline export verifier checks proposal/approval/dispatch consistency and conservation; it does not prove the provider's cancellation tombstones are permanent.
 
-## Deployment acceptance still required
+## Deployment acceptance and remaining gates
 
-- Local Caddy/Chromium HTTPS acceptance now verifies browser login/logout, role denial and secure-cookie behaviour. Repeat [browser acceptance](browser-acceptance.md) on the chosen host from its actual allowed network.
+- Local Caddy/Chromium HTTPS acceptance now verifies browser login/logout, role denial and secure-cookie behaviour. The [Railway acceptance record](railway-acceptance.md) repeats login, secure-cookie, role and recovery checks on real hosting with a public CA certificate.
 - The restricted runtime database role, operator-key rotation, provider-token rotation and log redaction are now exercised locally. Verify the chosen host secret store and its rotation procedure.
-- Set an acceptable recovery point and recovery time, configure managed backups for all independently owned stores, and restore them in the target environment. The included synthetic drill is not a consistent distributed snapshot.
+- Railway volume backup schedules and isolated logical restores of all three hosted stores have been verified. Still agree on recovery-point/recovery-time targets and test restoration onto a replacement host. The per-database logical drill is not a consistent distributed snapshot.
 - [Capacity acceptance](capacity.md) now measures four concurrent synthetic workspaces at 100 orders and 500 lanes each, including isolation and contention. Repeat with representative customer inputs and target-host/provider latency before setting capacity promises.
-- A [read-only monitoring probe](operations.md) now detects readiness failures and stale unresolved/executing/cancellation states. Connect its exit status to the chosen host scheduler and alert destination, then test delivery. No hosted alerting is configured; recovery stays operator-triggered.
+- A [read-only monitoring probe](operations.md) now detects readiness failures and stale unresolved/executing/cancellation states. The Railway pilot runs the probe every five minutes for its operator workspace. Connect failures to an agreed alert destination and test delivery. Alert delivery is not configured or tested; recovery stays operator-triggered.
 - Have an operations practitioner challenge priorities, costs, deadlines, cancellation policy and the replacement-approval workflow. Run the [acceptance drill](product-brief.md) and record observations.
 
 The [provider assessment](provider-assessment.md) found no drop-in vendor pair that establishes every current execution and cancellation guarantee. Provider selection and lifecycle mapping must precede a connected adapter.
 
-No live operational deployment or customer acceptance has been performed. Advancement through these gates requires the selected environment and provider evidence, not a larger synthetic test count.
+A private hosted deployment using synthetic providers has been validated. No live shipment execution or customer acceptance has been performed. Advancement through these gates requires the selected environment and provider evidence, not a larger synthetic test count.

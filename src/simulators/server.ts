@@ -6,14 +6,15 @@ if (kind !== 'inventory' && kind !== 'carrier')
   throw new Error('Usage: tsx src/simulators/server.ts inventory|carrier');
 const inventory = kind === 'inventory';
 const token = process.env.SIMULATOR_TOKEN;
+const allowedHostname = process.env.SIMULATOR_HOSTNAME;
 if (process.env.REPLAN_MODE === 'pilot' && !token)
   throw new Error('SIMULATOR_TOKEN is required in pilot mode');
 const databaseURL = inventory
   ? (process.env.INVENTORY_DATABASE_URL ?? 'postgresql://replan@127.0.0.1:55432/replan_inventory')
   : (process.env.CARRIER_DATABASE_URL ?? 'postgresql://replan@127.0.0.1:55432/replan_carrier');
 const app = await (inventory
-  ? createInventory(databaseURL, { token })
-  : createCarrier(databaseURL, { token }));
+  ? createInventory(databaseURL, { token, allowedHostname })
+  : createCarrier(databaseURL, { token, allowedHostname }));
 const port = Number(
   inventory ? (process.env.INVENTORY_PORT ?? 4311) : (process.env.CARRIER_PORT ?? 4312),
 );

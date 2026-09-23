@@ -188,10 +188,15 @@ describe('workspace operational summary', () => {
 describe('read-only HTTPS monitoring command', () => {
   let directory: string;
   let server: Server;
+  let redirectServer: Server;
   let origin: string;
+  let redirectOrigin: string;
+  let redirectPath: string;
+  let redirectLocation: string;
   let mode = 'healthy';
   let summary: OperationsHealth;
-  let requests: { path: string; authorized: boolean }[];
+  let requests: { method: string; path: string; authorized: boolean }[];
+  let redirectedRequests: number;
   const key = `rpl_${randomBytes(32).toString('base64url')}`;
   const extraSecret = 'Sensitive provider body that must never become monitoring output';
 
@@ -223,32 +228,41 @@ describe('read-only HTTPS monitoring command', () => {
     );
     if (generated.status !== 0)
       throw new Error('OpenSSL could not create the ephemeral HTTPS test certificate.');
-    server = createServer(
-      { key: await readFile(privateKey), cert: await readFile(cert) },
-      (request, response) => {
-        const path = request.url!;
-        requests.push({ path, authorized: request.headers.authorization === `Bearer ${key}` });
-        response.setHeader('content-type', 'application/json');
-        if (path === '/api/ready') {
-          response.statusCode = mode === 'unready' ? 503 : 200;
-          response.end(
-            JSON.stringify(mode === 'unready' ? { error: key + extraSecret } : { ok: true }),
-          );
-        } else if (mode === 'redirect') {
-          response.writeHead(302, { location: `${origin}/redirect-target` });
-          response.end(key + extraSecret);
-        } else if (mode === 'unauthorized') {
-          response.statusCode = 403;
-          response.end(JSON.stringify({ error: key + extraSecret }));
-        } else if (mode === 'timeout') {
-          // The client's bounded abort must close this request without a retry.
-        } else if (mode === 'malformed') {
-          response.end(JSON.stringify({ ...summary, secret: key + extraSecret }));
-        } else if (mode === 'oversized') {
-          response.end(JSON.stringify({ secret: (key + extraSecret).repeat(1000) }));
-        } else response.end(JSON.stringify(summary));
-      },
-    );
+    const tls = { key: await readFile(privateKey), cert: await readFile(cert) };
+    redirectServer = createServer(tls, (_request, response) => {
+      redirectedRequests++;
+      response.end('{}');
+    });
+    redirectServer.listen(0, '127.0.0.1');
+    await once(redirectServer, 'listening');
+    redirectOrigin = `https://127.0.0.1:${(redirectServer.address() as import('node:net').AddressInfo).port}`;
+    server = createServer(tls, (request, response) => {
+      const path = request.url!;
+      requests.push({
+        method: request.method!,
+        path,
+        authorized: request.headers.authorization === `Bearer ${key}`,
+      });
+      response.setHeader('content-type', 'application/json');
+      if (mode === 'redirect' && path === redirectPath) {
+        response.writeHead(302, { location: redirectLocation });
+        response.end(key + extraSecret);
+      } else if (path === '/api/ready') {
+        response.statusCode = mode === 'unready' ? 503 : 200;
+        response.end(
+          JSON.stringify(mode === 'unready' ? { error: key + extraSecret } : { ok: true }),
+        );
+      } else if (mode === 'unauthorized') {
+        response.statusCode = 403;
+        response.end(JSON.stringify({ error: key + extraSecret }));
+      } else if (mode === 'timeout') {
+        // The client's bounded abort must close this request without a retry.
+      } else if (mode === 'malformed') {
+        response.end(JSON.stringify({ ...summary, secret: key + extraSecret }));
+      } else if (mode === 'oversized') {
+        response.end(JSON.stringify({ secret: (key + extraSecret).repeat(1000) }));
+      } else response.end(JSON.stringify(summary));
+    });
     server.listen(0, '127.0.0.1');
     await once(server, 'listening');
     origin = `https://127.0.0.1:${(server.address() as import('node:net').AddressInfo).port}`;
@@ -256,6 +270,9 @@ describe('read-only HTTPS monitoring command', () => {
   beforeEach(() => {
     mode = 'healthy';
     requests = [];
+    redirectedRequests = 0;
+    redirectPath = '/api/ready';
+    redirectLocation = `${origin}/redirect-target`;
     const empty = { count: 0, oldestAgeSeconds: null };
     summary = {
       observedAt: new Date().toISOString(),
@@ -265,9 +282,10 @@ describe('read-only HTTPS monitoring command', () => {
     };
   });
   afterAll(async () => {
-    if (server) {
-      server.closeAllConnections();
-      await new Promise<void>((done) => server.close(() => done()));
+    for (const instance of [server, redirectServer]) {
+      if (!instance) continue;
+      instance.closeAllConnections();
+      await new Promise<void>((done) => instance.close(() => done()));
     }
     if (directory) await rm(directory, { recursive: true });
   });
@@ -319,8 +337,8 @@ describe('read-only HTTPS monitoring command', () => {
     });
     expect(requests).toEqual(
       expect.arrayContaining([
-        { path: '/api/ready', authorized: false },
-        { path: '/api/operations/health', authorized: true },
+        { method: 'GET', path: '/api/ready', authorized: true },
+        { method: 'GET', path: '/api/operations/health', authorized: true },
       ]),
     );
     expect(requests).toHaveLength(2);
@@ -355,14 +373,28 @@ describe('read-only HTTPS monitoring command', () => {
     });
   });
 
-  it('refuses redirects without forwarding a credential or issuing a follow-up request', async () => {
-    mode = 'redirect';
-    const response = await probe();
-    expect(response.code).toBe(1);
-    expect(response.result.failures).toContain('operations_unavailable');
-    expect(requests.some((request) => request.path === '/redirect-target')).toBe(false);
-    expect(requests).toHaveLength(2);
-  });
+  it.each([
+    ['/api/ready', 'same-origin', 'readiness_unavailable'],
+    ['/api/ready', 'cross-origin', 'readiness_unavailable'],
+    ['/api/operations/health', 'same-origin', 'operations_unavailable'],
+    ['/api/operations/health', 'cross-origin', 'operations_unavailable'],
+  ])(
+    'refuses %s %s redirects without forwarding credentials',
+    async (path, destination, failure) => {
+      mode = 'redirect';
+      redirectPath = path;
+      redirectLocation = `${destination === 'same-origin' ? origin : redirectOrigin}/redirect-target`;
+      const response = await probe();
+      expect(response.code).toBe(1);
+      expect(response.result.failures).toContain(failure);
+      expect(requests.some((request) => request.path === '/redirect-target')).toBe(false);
+      expect(requests).toHaveLength(2);
+      expect(requests.every((request) => request.method === 'GET' && request.authorized)).toBe(
+        true,
+      );
+      expect(redirectedRequests).toBe(0);
+    },
+  );
 
   it('bounds the response size and validates the exact report shape', async () => {
     for (const value of ['malformed', 'oversized']) {

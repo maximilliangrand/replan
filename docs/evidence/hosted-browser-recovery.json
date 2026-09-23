@@ -1,0 +1,1193 @@
+{
+  "schemaVersion": 1,
+  "exportedAt": "2026-09-23T14:33:58.674Z",
+  "scenario": {
+    "id": "c6f3451f-0c60-4b0e-a06e-9546881a4243",
+    "name": "Deployment acceptance — simulation",
+    "lanes": [
+      {
+        "id": "VIE-LNZ",
+        "mode": "Road courier",
+        "hours": 3,
+        "factory": "Linz",
+        "capacity": 8,
+        "unitCost": 45,
+        "warehouse": "Vienna"
+      },
+      {
+        "id": "BRQ-LNZ",
+        "mode": "Express van",
+        "hours": 5,
+        "factory": "Linz",
+        "capacity": 6,
+        "unitCost": 90,
+        "warehouse": "Brno"
+      },
+      {
+        "id": "MUC-LNZ",
+        "mode": "Road courier",
+        "hours": 6,
+        "factory": "Linz",
+        "capacity": 8,
+        "unitCost": 80,
+        "warehouse": "Munich"
+      },
+      {
+        "id": "VIE-GRZ",
+        "mode": "Road courier",
+        "hours": 3,
+        "factory": "Graz",
+        "capacity": 8,
+        "unitCost": 30,
+        "warehouse": "Vienna"
+      },
+      {
+        "id": "BRQ-GRZ",
+        "mode": "Express van",
+        "hours": 7,
+        "factory": "Graz",
+        "capacity": 6,
+        "unitCost": 85,
+        "warehouse": "Brno"
+      },
+      {
+        "id": "MUC-GRZ",
+        "mode": "Express van",
+        "hours": 9,
+        "factory": "Graz",
+        "capacity": 8,
+        "unitCost": 100,
+        "warehouse": "Munich"
+      },
+      {
+        "id": "VIE-BRQ",
+        "mode": "Road courier",
+        "hours": 3,
+        "factory": "Brno",
+        "capacity": 8,
+        "unitCost": 20,
+        "warehouse": "Vienna"
+      },
+      {
+        "id": "BRQ-BRQ",
+        "mode": "Local courier",
+        "hours": 1,
+        "factory": "Brno",
+        "capacity": 6,
+        "unitCost": 15,
+        "warehouse": "Brno"
+      },
+      {
+        "id": "MUC-BRQ",
+        "mode": "Express van",
+        "hours": 9,
+        "factory": "Brno",
+        "capacity": 8,
+        "unitCost": 110,
+        "warehouse": "Munich"
+      }
+    ],
+    "orders": [
+      {
+        "id": "LINZ-104",
+        "part": "BRG-42",
+        "factory": "Linz",
+        "priority": 10,
+        "quantity": 4,
+        "deadlineHours": 8
+      },
+      {
+        "id": "GRAZ-208",
+        "part": "BRG-42",
+        "factory": "Graz",
+        "priority": 8,
+        "quantity": 3,
+        "deadlineHours": 12
+      },
+      {
+        "id": "BRNO-306",
+        "part": "BRG-42",
+        "factory": "Brno",
+        "priority": 6,
+        "quantity": 2,
+        "deadlineHours": 10
+      }
+    ],
+    "description": "A supplier delay puts three factory repairs at risk. Transfer available bearing kits before each repair window closes."
+  },
+  "snapshot": {
+    "stock": [
+      {
+        "part": "BRG-42",
+        "version": 1,
+        "available": 4,
+        "warehouse": "Brno"
+      },
+      {
+        "part": "BRG-42",
+        "version": 1,
+        "available": 8,
+        "warehouse": "Munich"
+      },
+      {
+        "part": "BRG-42",
+        "version": 1,
+        "available": 6,
+        "warehouse": "Vienna"
+      }
+    ],
+    "observedAt": "2026-09-23T14:26:39.298Z"
+  },
+  "plans": [
+    {
+      "id": "d24301f0-245a-40ed-b8bb-ab82adc0791a",
+      "scenarioId": "c6f3451f-0c60-4b0e-a06e-9546881a4243",
+      "strategy": "optimized",
+      "snapshot": {
+        "stock": [
+          {
+            "part": "BRG-42",
+            "version": 1,
+            "available": 4,
+            "warehouse": "Brno"
+          },
+          {
+            "part": "BRG-42",
+            "version": 1,
+            "available": 8,
+            "warehouse": "Munich"
+          },
+          {
+            "part": "BRG-42",
+            "version": 1,
+            "available": 6,
+            "warehouse": "Vienna"
+          }
+        ],
+        "observedAt": "2026-09-23T14:26:39.298Z"
+      },
+      "solution": {
+        "solveMs": 3.291,
+        "unfilled": [],
+        "totalCost": 440,
+        "allocations": [
+          {
+            "cost": 320,
+            "mode": "Road courier",
+            "part": "BRG-42",
+            "hours": 6,
+            "laneId": "MUC-LNZ",
+            "orderId": "LINZ-104",
+            "quantity": 4,
+            "warehouse": "Munich",
+            "stockVersion": 1
+          },
+          {
+            "cost": 90,
+            "mode": "Road courier",
+            "part": "BRG-42",
+            "hours": 3,
+            "laneId": "VIE-GRZ",
+            "orderId": "GRAZ-208",
+            "quantity": 3,
+            "warehouse": "Vienna",
+            "stockVersion": 1
+          },
+          {
+            "cost": 30,
+            "mode": "Local courier",
+            "part": "BRG-42",
+            "hours": 1,
+            "laneId": "BRQ-BRQ",
+            "orderId": "BRNO-306",
+            "quantity": 2,
+            "warehouse": "Brno",
+            "stockVersion": 1
+          }
+        ],
+        "explanation": "Maximum fulfilled priority, then minimum transport cost, proven for this snapshot and these constraints.",
+        "solverStatus": "OPTIMAL",
+        "fulfilledPriority": 24
+      },
+      "hash": "bc8e2a99b2be21437142d1d10833900a0196f55338b87e4ed80b742883115ff0",
+      "status": "completed",
+      "reason": "All transfers in this approved plan were dispatched. Delivery is not simulated.",
+      "cancelReason": null,
+      "createdAt": "2026-09-23T14:31:46.998Z",
+      "approvedAt": "2026-09-23T14:31:47.542Z",
+      "actions": [
+        {
+          "id": "d24301f0-245a-40ed-b8bb-ab82adc0791a:0",
+          "planId": "d24301f0-245a-40ed-b8bb-ab82adc0791a",
+          "allocation": {
+            "cost": 320,
+            "mode": "Road courier",
+            "part": "BRG-42",
+            "hours": 6,
+            "laneId": "MUC-LNZ",
+            "orderId": "LINZ-104",
+            "quantity": 4,
+            "warehouse": "Munich",
+            "stockVersion": 1
+          },
+          "stage": "completed",
+          "reservation": {
+            "key": "d24301f0-245a-40ed-b8bb-ab82adc0791a:0",
+            "part": "BRG-42",
+            "status": "consumed",
+            "version": 2,
+            "quantity": 4,
+            "warehouse": "Munich",
+            "scenarioId": "c6f3451f-0c60-4b0e-a06e-9546881a4243"
+          },
+          "shipment": {
+            "key": "d24301f0-245a-40ed-b8bb-ab82adc0791a:0",
+            "cost": 320,
+            "laneId": "MUC-LNZ",
+            "status": "dispatched",
+            "orderId": "LINZ-104",
+            "quantity": 4,
+            "createdAt": "2026-09-23T14:32:39.014Z",
+            "warehouse": "Munich",
+            "scenarioId": "c6f3451f-0c60-4b0e-a06e-9546881a4243"
+          },
+          "error": null
+        },
+        {
+          "id": "d24301f0-245a-40ed-b8bb-ab82adc0791a:1",
+          "planId": "d24301f0-245a-40ed-b8bb-ab82adc0791a",
+          "allocation": {
+            "cost": 90,
+            "mode": "Road courier",
+            "part": "BRG-42",
+            "hours": 3,
+            "laneId": "VIE-GRZ",
+            "orderId": "GRAZ-208",
+            "quantity": 3,
+            "warehouse": "Vienna",
+            "stockVersion": 1
+          },
+          "stage": "completed",
+          "reservation": {
+            "key": "d24301f0-245a-40ed-b8bb-ab82adc0791a:1",
+            "part": "BRG-42",
+            "status": "consumed",
+            "version": 2,
+            "quantity": 3,
+            "warehouse": "Vienna",
+            "scenarioId": "c6f3451f-0c60-4b0e-a06e-9546881a4243"
+          },
+          "shipment": {
+            "key": "d24301f0-245a-40ed-b8bb-ab82adc0791a:1",
+            "cost": 90,
+            "laneId": "VIE-GRZ",
+            "status": "dispatched",
+            "orderId": "GRAZ-208",
+            "quantity": 3,
+            "createdAt": "2026-09-23T14:33:58.429Z",
+            "warehouse": "Vienna",
+            "scenarioId": "c6f3451f-0c60-4b0e-a06e-9546881a4243"
+          },
+          "error": null
+        },
+        {
+          "id": "d24301f0-245a-40ed-b8bb-ab82adc0791a:2",
+          "planId": "d24301f0-245a-40ed-b8bb-ab82adc0791a",
+          "allocation": {
+            "cost": 30,
+            "mode": "Local courier",
+            "part": "BRG-42",
+            "hours": 1,
+            "laneId": "BRQ-BRQ",
+            "orderId": "BRNO-306",
+            "quantity": 2,
+            "warehouse": "Brno",
+            "stockVersion": 1
+          },
+          "stage": "completed",
+          "reservation": {
+            "key": "d24301f0-245a-40ed-b8bb-ab82adc0791a:2",
+            "part": "BRG-42",
+            "status": "consumed",
+            "version": 2,
+            "quantity": 2,
+            "warehouse": "Brno",
+            "scenarioId": "c6f3451f-0c60-4b0e-a06e-9546881a4243"
+          },
+          "shipment": {
+            "key": "d24301f0-245a-40ed-b8bb-ab82adc0791a:2",
+            "cost": 30,
+            "laneId": "BRQ-BRQ",
+            "status": "dispatched",
+            "orderId": "BRNO-306",
+            "quantity": 2,
+            "createdAt": "2026-09-23T14:33:58.483Z",
+            "warehouse": "Brno",
+            "scenarioId": "c6f3451f-0c60-4b0e-a06e-9546881a4243"
+          },
+          "error": null
+        }
+      ]
+    }
+  ],
+  "events": [
+    {
+      "seq": 2,
+      "at": "2026-09-23T14:26:39.276Z",
+      "planId": null,
+      "actionId": null,
+      "kind": "scenario.started",
+      "message": "Administrator imported an operation with authoritative inventory evidence.",
+      "data": {
+        "actor": {
+          "id": "a1b88fae-5959-4897-a5d7-02ced1bd73c6",
+          "name": "Deployment acceptance operator",
+          "role": "admin",
+          "workspaceId": "b84ae17b-e992-40b8-adeb-a8dd477bb675"
+        },
+        "stock": [
+          {
+            "part": "BRG-42",
+            "version": 1,
+            "available": 4,
+            "warehouse": "Brno"
+          },
+          {
+            "part": "BRG-42",
+            "version": 1,
+            "available": 8,
+            "warehouse": "Munich"
+          },
+          {
+            "part": "BRG-42",
+            "version": 1,
+            "available": 6,
+            "warehouse": "Vienna"
+          }
+        ],
+        "source": "Hosted synthetic pilot; no live shipments",
+        "scenario": {
+          "id": "c6f3451f-0c60-4b0e-a06e-9546881a4243",
+          "name": "Deployment acceptance — simulation",
+          "lanes": [
+            {
+              "id": "VIE-LNZ",
+              "mode": "Road courier",
+              "hours": 3,
+              "factory": "Linz",
+              "capacity": 8,
+              "unitCost": 45,
+              "warehouse": "Vienna"
+            },
+            {
+              "id": "BRQ-LNZ",
+              "mode": "Express van",
+              "hours": 5,
+              "factory": "Linz",
+              "capacity": 6,
+              "unitCost": 90,
+              "warehouse": "Brno"
+            },
+            {
+              "id": "MUC-LNZ",
+              "mode": "Road courier",
+              "hours": 6,
+              "factory": "Linz",
+              "capacity": 8,
+              "unitCost": 80,
+              "warehouse": "Munich"
+            },
+            {
+              "id": "VIE-GRZ",
+              "mode": "Road courier",
+              "hours": 3,
+              "factory": "Graz",
+              "capacity": 8,
+              "unitCost": 30,
+              "warehouse": "Vienna"
+            },
+            {
+              "id": "BRQ-GRZ",
+              "mode": "Express van",
+              "hours": 7,
+              "factory": "Graz",
+              "capacity": 6,
+              "unitCost": 85,
+              "warehouse": "Brno"
+            },
+            {
+              "id": "MUC-GRZ",
+              "mode": "Express van",
+              "hours": 9,
+              "factory": "Graz",
+              "capacity": 8,
+              "unitCost": 100,
+              "warehouse": "Munich"
+            },
+            {
+              "id": "VIE-BRQ",
+              "mode": "Road courier",
+              "hours": 3,
+              "factory": "Brno",
+              "capacity": 8,
+              "unitCost": 20,
+              "warehouse": "Vienna"
+            },
+            {
+              "id": "BRQ-BRQ",
+              "mode": "Local courier",
+              "hours": 1,
+              "factory": "Brno",
+              "capacity": 6,
+              "unitCost": 15,
+              "warehouse": "Brno"
+            },
+            {
+              "id": "MUC-BRQ",
+              "mode": "Express van",
+              "hours": 9,
+              "factory": "Brno",
+              "capacity": 8,
+              "unitCost": 110,
+              "warehouse": "Munich"
+            }
+          ],
+          "orders": [
+            {
+              "id": "LINZ-104",
+              "part": "BRG-42",
+              "factory": "Linz",
+              "priority": 10,
+              "quantity": 4,
+              "deadlineHours": 8
+            },
+            {
+              "id": "GRAZ-208",
+              "part": "BRG-42",
+              "factory": "Graz",
+              "priority": 8,
+              "quantity": 3,
+              "deadlineHours": 12
+            },
+            {
+              "id": "BRNO-306",
+              "part": "BRG-42",
+              "factory": "Brno",
+              "priority": 6,
+              "quantity": 2,
+              "deadlineHours": 10
+            }
+          ],
+          "description": "A supplier delay puts three factory repairs at risk. Transfer available bearing kits before each repair window closes."
+        }
+      }
+    },
+    {
+      "seq": 3,
+      "at": "2026-09-23T14:31:46.998Z",
+      "planId": "d24301f0-245a-40ed-b8bb-ab82adc0791a",
+      "actionId": null,
+      "kind": "plan.proposed",
+      "message": "Optimized proposal: 3 transfers, $440.",
+      "data": {
+        "hash": "bc8e2a99b2be21437142d1d10833900a0196f55338b87e4ed80b742883115ff0",
+        "actor": {
+          "id": "a1b88fae-5959-4897-a5d7-02ced1bd73c6",
+          "name": "Deployment acceptance operator",
+          "role": "admin",
+          "workspaceId": "b84ae17b-e992-40b8-adeb-a8dd477bb675"
+        },
+        "solution": {
+          "solveMs": 3.291,
+          "unfilled": [],
+          "totalCost": 440,
+          "allocations": [
+            {
+              "cost": 320,
+              "mode": "Road courier",
+              "part": "BRG-42",
+              "hours": 6,
+              "laneId": "MUC-LNZ",
+              "orderId": "LINZ-104",
+              "quantity": 4,
+              "warehouse": "Munich",
+              "stockVersion": 1
+            },
+            {
+              "cost": 90,
+              "mode": "Road courier",
+              "part": "BRG-42",
+              "hours": 3,
+              "laneId": "VIE-GRZ",
+              "orderId": "GRAZ-208",
+              "quantity": 3,
+              "warehouse": "Vienna",
+              "stockVersion": 1
+            },
+            {
+              "cost": 30,
+              "mode": "Local courier",
+              "part": "BRG-42",
+              "hours": 1,
+              "laneId": "BRQ-BRQ",
+              "orderId": "BRNO-306",
+              "quantity": 2,
+              "warehouse": "Brno",
+              "stockVersion": 1
+            }
+          ],
+          "explanation": "Maximum fulfilled priority, then minimum transport cost, proven for this snapshot and these constraints.",
+          "solverStatus": "OPTIMAL",
+          "fulfilledPriority": 24
+        },
+        "observedAt": "2026-09-23T14:26:39.298Z"
+      }
+    },
+    {
+      "seq": 4,
+      "at": "2026-09-23T14:31:47.542Z",
+      "planId": "d24301f0-245a-40ed-b8bb-ab82adc0791a",
+      "actionId": null,
+      "kind": "plan.approved",
+      "message": "Operator approved the exact allocations, cost, and source versions.",
+      "data": {
+        "hash": "bc8e2a99b2be21437142d1d10833900a0196f55338b87e4ed80b742883115ff0",
+        "actor": {
+          "id": "a1b88fae-5959-4897-a5d7-02ced1bd73c6",
+          "name": "Deployment acceptance operator",
+          "role": "admin",
+          "workspaceId": "b84ae17b-e992-40b8-adeb-a8dd477bb675"
+        },
+        "totalCost": 440
+      }
+    },
+    {
+      "seq": 5,
+      "at": "2026-09-23T14:32:38.961Z",
+      "planId": "d24301f0-245a-40ed-b8bb-ab82adc0791a",
+      "actionId": null,
+      "kind": "plan.executing",
+      "message": "Plan executing.",
+      "data": {
+        "actor": {
+          "id": "a1b88fae-5959-4897-a5d7-02ced1bd73c6",
+          "name": "Deployment acceptance operator",
+          "role": "admin",
+          "workspaceId": "b84ae17b-e992-40b8-adeb-a8dd477bb675"
+        }
+      }
+    },
+    {
+      "seq": 6,
+      "at": "2026-09-23T14:32:38.971Z",
+      "planId": "d24301f0-245a-40ed-b8bb-ab82adc0791a",
+      "actionId": "d24301f0-245a-40ed-b8bb-ab82adc0791a:0",
+      "kind": "action.reserving",
+      "message": "Reserving 4 kits at Munich.",
+      "data": {
+        "actor": {
+          "id": "a1b88fae-5959-4897-a5d7-02ced1bd73c6",
+          "name": "Deployment acceptance operator",
+          "role": "admin",
+          "workspaceId": "b84ae17b-e992-40b8-adeb-a8dd477bb675"
+        },
+        "orderId": "LINZ-104"
+      }
+    },
+    {
+      "seq": 7,
+      "at": "2026-09-23T14:32:38.988Z",
+      "planId": "d24301f0-245a-40ed-b8bb-ab82adc0791a",
+      "actionId": "d24301f0-245a-40ed-b8bb-ab82adc0791a:0",
+      "kind": "action.reserved",
+      "message": "Reservation confirmed at Munich.",
+      "data": {
+        "actor": {
+          "id": "a1b88fae-5959-4897-a5d7-02ced1bd73c6",
+          "name": "Deployment acceptance operator",
+          "role": "admin",
+          "workspaceId": "b84ae17b-e992-40b8-adeb-a8dd477bb675"
+        },
+        "orderId": "LINZ-104",
+        "reservation": {
+          "key": "d24301f0-245a-40ed-b8bb-ab82adc0791a:0",
+          "part": "BRG-42",
+          "status": "held",
+          "version": 2,
+          "quantity": 4,
+          "warehouse": "Munich",
+          "scenarioId": "c6f3451f-0c60-4b0e-a06e-9546881a4243"
+        }
+      }
+    },
+    {
+      "seq": 8,
+      "at": "2026-09-23T14:32:39.004Z",
+      "planId": "d24301f0-245a-40ed-b8bb-ab82adc0791a",
+      "actionId": "d24301f0-245a-40ed-b8bb-ab82adc0791a:0",
+      "kind": "action.dispatching",
+      "message": "Sending LINZ-104 to the carrier with a stable commitment key.",
+      "data": {
+        "actor": {
+          "id": "a1b88fae-5959-4897-a5d7-02ced1bd73c6",
+          "name": "Deployment acceptance operator",
+          "role": "admin",
+          "workspaceId": "b84ae17b-e992-40b8-adeb-a8dd477bb675"
+        },
+        "orderId": "LINZ-104"
+      }
+    },
+    {
+      "seq": 9,
+      "at": "2026-09-23T14:32:39.021Z",
+      "planId": "d24301f0-245a-40ed-b8bb-ab82adc0791a",
+      "actionId": "d24301f0-245a-40ed-b8bb-ab82adc0791a:0",
+      "kind": "action.dispatch_unknown",
+      "message": "Provider response unavailable or invalid; outcome must be reconciled.",
+      "data": {
+        "actor": {
+          "id": "a1b88fae-5959-4897-a5d7-02ced1bd73c6",
+          "name": "Deployment acceptance operator",
+          "role": "admin",
+          "workspaceId": "b84ae17b-e992-40b8-adeb-a8dd477bb675"
+        },
+        "error": "Provider response unavailable or invalid; outcome must be reconciled.",
+        "orderId": "LINZ-104"
+      }
+    },
+    {
+      "seq": 10,
+      "at": "2026-09-23T14:32:39.026Z",
+      "planId": "d24301f0-245a-40ed-b8bb-ab82adc0791a",
+      "actionId": null,
+      "kind": "plan.uncertain",
+      "message": "An external outcome is unresolved. Reconcile before retrying or approving a replacement.",
+      "data": {
+        "actor": {
+          "id": "a1b88fae-5959-4897-a5d7-02ced1bd73c6",
+          "name": "Deployment acceptance operator",
+          "role": "admin",
+          "workspaceId": "b84ae17b-e992-40b8-adeb-a8dd477bb675"
+        }
+      }
+    },
+    {
+      "seq": 11,
+      "at": "2026-09-23T14:33:36.116Z",
+      "planId": "d24301f0-245a-40ed-b8bb-ab82adc0791a",
+      "actionId": null,
+      "kind": "plan.executing",
+      "message": "Plan executing.",
+      "data": {
+        "actor": {
+          "id": "a1b88fae-5959-4897-a5d7-02ced1bd73c6",
+          "name": "Deployment acceptance operator",
+          "role": "admin",
+          "workspaceId": "b84ae17b-e992-40b8-adeb-a8dd477bb675"
+        }
+      }
+    },
+    {
+      "seq": 12,
+      "at": "2026-09-23T14:33:36.147Z",
+      "planId": "d24301f0-245a-40ed-b8bb-ab82adc0791a",
+      "actionId": "d24301f0-245a-40ed-b8bb-ab82adc0791a:0",
+      "kind": "action.dispatch_unknown",
+      "message": "Carrier lookup is temporarily unavailable; shipment status is unknown",
+      "data": {
+        "actor": {
+          "id": "a1b88fae-5959-4897-a5d7-02ced1bd73c6",
+          "name": "Deployment acceptance operator",
+          "role": "admin",
+          "workspaceId": "b84ae17b-e992-40b8-adeb-a8dd477bb675"
+        },
+        "error": "Carrier lookup is temporarily unavailable; shipment status is unknown",
+        "orderId": "LINZ-104"
+      }
+    },
+    {
+      "seq": 13,
+      "at": "2026-09-23T14:33:36.265Z",
+      "planId": "d24301f0-245a-40ed-b8bb-ab82adc0791a",
+      "actionId": null,
+      "kind": "plan.uncertain",
+      "message": "An external outcome is unresolved. Reconcile before retrying or approving a replacement.",
+      "data": {
+        "actor": {
+          "id": "a1b88fae-5959-4897-a5d7-02ced1bd73c6",
+          "name": "Deployment acceptance operator",
+          "role": "admin",
+          "workspaceId": "b84ae17b-e992-40b8-adeb-a8dd477bb675"
+        }
+      }
+    },
+    {
+      "seq": 14,
+      "at": "2026-09-23T14:33:58.367Z",
+      "planId": "d24301f0-245a-40ed-b8bb-ab82adc0791a",
+      "actionId": null,
+      "kind": "plan.executing",
+      "message": "Plan executing.",
+      "data": {
+        "actor": {
+          "id": "a1b88fae-5959-4897-a5d7-02ced1bd73c6",
+          "name": "Deployment acceptance operator",
+          "role": "admin",
+          "workspaceId": "b84ae17b-e992-40b8-adeb-a8dd477bb675"
+        }
+      }
+    },
+    {
+      "seq": 15,
+      "at": "2026-09-23T14:33:58.380Z",
+      "planId": "d24301f0-245a-40ed-b8bb-ab82adc0791a",
+      "actionId": "d24301f0-245a-40ed-b8bb-ab82adc0791a:0",
+      "kind": "carrier.reconciled",
+      "message": "Carrier confirms LINZ-104 was already dispatched. No duplicate request sent.",
+      "data": {
+        "actor": {
+          "id": "a1b88fae-5959-4897-a5d7-02ced1bd73c6",
+          "name": "Deployment acceptance operator",
+          "role": "admin",
+          "workspaceId": "b84ae17b-e992-40b8-adeb-a8dd477bb675"
+        },
+        "shipment": {
+          "key": "d24301f0-245a-40ed-b8bb-ab82adc0791a:0",
+          "cost": 320,
+          "laneId": "MUC-LNZ",
+          "status": "dispatched",
+          "orderId": "LINZ-104",
+          "quantity": 4,
+          "createdAt": "2026-09-23T14:32:39.014Z",
+          "warehouse": "Munich",
+          "scenarioId": "c6f3451f-0c60-4b0e-a06e-9546881a4243"
+        }
+      }
+    },
+    {
+      "seq": 16,
+      "at": "2026-09-23T14:33:58.382Z",
+      "planId": "d24301f0-245a-40ed-b8bb-ab82adc0791a",
+      "actionId": "d24301f0-245a-40ed-b8bb-ab82adc0791a:0",
+      "kind": "action.dispatched",
+      "message": "Carrier committed LINZ-104. This physical action is not rolled back.",
+      "data": {
+        "actor": {
+          "id": "a1b88fae-5959-4897-a5d7-02ced1bd73c6",
+          "name": "Deployment acceptance operator",
+          "role": "admin",
+          "workspaceId": "b84ae17b-e992-40b8-adeb-a8dd477bb675"
+        },
+        "orderId": "LINZ-104",
+        "shipment": {
+          "key": "d24301f0-245a-40ed-b8bb-ab82adc0791a:0",
+          "cost": 320,
+          "laneId": "MUC-LNZ",
+          "status": "dispatched",
+          "orderId": "LINZ-104",
+          "quantity": 4,
+          "createdAt": "2026-09-23T14:32:39.014Z",
+          "warehouse": "Munich",
+          "scenarioId": "c6f3451f-0c60-4b0e-a06e-9546881a4243"
+        }
+      }
+    },
+    {
+      "seq": 17,
+      "at": "2026-09-23T14:33:58.392Z",
+      "planId": "d24301f0-245a-40ed-b8bb-ab82adc0791a",
+      "actionId": "d24301f0-245a-40ed-b8bb-ab82adc0791a:0",
+      "kind": "action.completed",
+      "message": "LINZ-104 dispatched; inventory movement recorded.",
+      "data": {
+        "actor": {
+          "id": "a1b88fae-5959-4897-a5d7-02ced1bd73c6",
+          "name": "Deployment acceptance operator",
+          "role": "admin",
+          "workspaceId": "b84ae17b-e992-40b8-adeb-a8dd477bb675"
+        },
+        "orderId": "LINZ-104",
+        "shipment": {
+          "key": "d24301f0-245a-40ed-b8bb-ab82adc0791a:0",
+          "cost": 320,
+          "laneId": "MUC-LNZ",
+          "status": "dispatched",
+          "orderId": "LINZ-104",
+          "quantity": 4,
+          "createdAt": "2026-09-23T14:32:39.014Z",
+          "warehouse": "Munich",
+          "scenarioId": "c6f3451f-0c60-4b0e-a06e-9546881a4243"
+        },
+        "reservation": {
+          "key": "d24301f0-245a-40ed-b8bb-ab82adc0791a:0",
+          "part": "BRG-42",
+          "status": "consumed",
+          "version": 2,
+          "quantity": 4,
+          "warehouse": "Munich",
+          "scenarioId": "c6f3451f-0c60-4b0e-a06e-9546881a4243"
+        }
+      }
+    },
+    {
+      "seq": 18,
+      "at": "2026-09-23T14:33:58.402Z",
+      "planId": "d24301f0-245a-40ed-b8bb-ab82adc0791a",
+      "actionId": "d24301f0-245a-40ed-b8bb-ab82adc0791a:1",
+      "kind": "action.reserving",
+      "message": "Reserving 3 kits at Vienna.",
+      "data": {
+        "actor": {
+          "id": "a1b88fae-5959-4897-a5d7-02ced1bd73c6",
+          "name": "Deployment acceptance operator",
+          "role": "admin",
+          "workspaceId": "b84ae17b-e992-40b8-adeb-a8dd477bb675"
+        },
+        "orderId": "GRAZ-208"
+      }
+    },
+    {
+      "seq": 19,
+      "at": "2026-09-23T14:33:58.412Z",
+      "planId": "d24301f0-245a-40ed-b8bb-ab82adc0791a",
+      "actionId": "d24301f0-245a-40ed-b8bb-ab82adc0791a:1",
+      "kind": "action.reserved",
+      "message": "Reservation confirmed at Vienna.",
+      "data": {
+        "actor": {
+          "id": "a1b88fae-5959-4897-a5d7-02ced1bd73c6",
+          "name": "Deployment acceptance operator",
+          "role": "admin",
+          "workspaceId": "b84ae17b-e992-40b8-adeb-a8dd477bb675"
+        },
+        "orderId": "GRAZ-208",
+        "reservation": {
+          "key": "d24301f0-245a-40ed-b8bb-ab82adc0791a:1",
+          "part": "BRG-42",
+          "status": "held",
+          "version": 2,
+          "quantity": 3,
+          "warehouse": "Vienna",
+          "scenarioId": "c6f3451f-0c60-4b0e-a06e-9546881a4243"
+        }
+      }
+    },
+    {
+      "seq": 20,
+      "at": "2026-09-23T14:33:58.421Z",
+      "planId": "d24301f0-245a-40ed-b8bb-ab82adc0791a",
+      "actionId": "d24301f0-245a-40ed-b8bb-ab82adc0791a:1",
+      "kind": "action.dispatching",
+      "message": "Sending GRAZ-208 to the carrier with a stable commitment key.",
+      "data": {
+        "actor": {
+          "id": "a1b88fae-5959-4897-a5d7-02ced1bd73c6",
+          "name": "Deployment acceptance operator",
+          "role": "admin",
+          "workspaceId": "b84ae17b-e992-40b8-adeb-a8dd477bb675"
+        },
+        "orderId": "GRAZ-208"
+      }
+    },
+    {
+      "seq": 21,
+      "at": "2026-09-23T14:33:58.432Z",
+      "planId": "d24301f0-245a-40ed-b8bb-ab82adc0791a",
+      "actionId": "d24301f0-245a-40ed-b8bb-ab82adc0791a:1",
+      "kind": "action.dispatched",
+      "message": "Carrier committed GRAZ-208. This physical action is not rolled back.",
+      "data": {
+        "actor": {
+          "id": "a1b88fae-5959-4897-a5d7-02ced1bd73c6",
+          "name": "Deployment acceptance operator",
+          "role": "admin",
+          "workspaceId": "b84ae17b-e992-40b8-adeb-a8dd477bb675"
+        },
+        "orderId": "GRAZ-208",
+        "shipment": {
+          "key": "d24301f0-245a-40ed-b8bb-ab82adc0791a:1",
+          "cost": 90,
+          "laneId": "VIE-GRZ",
+          "status": "dispatched",
+          "orderId": "GRAZ-208",
+          "quantity": 3,
+          "createdAt": "2026-09-23T14:33:58.429Z",
+          "warehouse": "Vienna",
+          "scenarioId": "c6f3451f-0c60-4b0e-a06e-9546881a4243"
+        }
+      }
+    },
+    {
+      "seq": 22,
+      "at": "2026-09-23T14:33:58.439Z",
+      "planId": "d24301f0-245a-40ed-b8bb-ab82adc0791a",
+      "actionId": "d24301f0-245a-40ed-b8bb-ab82adc0791a:1",
+      "kind": "action.completed",
+      "message": "GRAZ-208 dispatched; inventory movement recorded.",
+      "data": {
+        "actor": {
+          "id": "a1b88fae-5959-4897-a5d7-02ced1bd73c6",
+          "name": "Deployment acceptance operator",
+          "role": "admin",
+          "workspaceId": "b84ae17b-e992-40b8-adeb-a8dd477bb675"
+        },
+        "orderId": "GRAZ-208",
+        "shipment": {
+          "key": "d24301f0-245a-40ed-b8bb-ab82adc0791a:1",
+          "cost": 90,
+          "laneId": "VIE-GRZ",
+          "status": "dispatched",
+          "orderId": "GRAZ-208",
+          "quantity": 3,
+          "createdAt": "2026-09-23T14:33:58.429Z",
+          "warehouse": "Vienna",
+          "scenarioId": "c6f3451f-0c60-4b0e-a06e-9546881a4243"
+        },
+        "reservation": {
+          "key": "d24301f0-245a-40ed-b8bb-ab82adc0791a:1",
+          "part": "BRG-42",
+          "status": "consumed",
+          "version": 2,
+          "quantity": 3,
+          "warehouse": "Vienna",
+          "scenarioId": "c6f3451f-0c60-4b0e-a06e-9546881a4243"
+        }
+      }
+    },
+    {
+      "seq": 23,
+      "at": "2026-09-23T14:33:58.445Z",
+      "planId": "d24301f0-245a-40ed-b8bb-ab82adc0791a",
+      "actionId": "d24301f0-245a-40ed-b8bb-ab82adc0791a:2",
+      "kind": "action.reserving",
+      "message": "Reserving 2 kits at Brno.",
+      "data": {
+        "actor": {
+          "id": "a1b88fae-5959-4897-a5d7-02ced1bd73c6",
+          "name": "Deployment acceptance operator",
+          "role": "admin",
+          "workspaceId": "b84ae17b-e992-40b8-adeb-a8dd477bb675"
+        },
+        "orderId": "BRNO-306"
+      }
+    },
+    {
+      "seq": 24,
+      "at": "2026-09-23T14:33:58.458Z",
+      "planId": "d24301f0-245a-40ed-b8bb-ab82adc0791a",
+      "actionId": "d24301f0-245a-40ed-b8bb-ab82adc0791a:2",
+      "kind": "action.reserved",
+      "message": "Reservation confirmed at Brno.",
+      "data": {
+        "actor": {
+          "id": "a1b88fae-5959-4897-a5d7-02ced1bd73c6",
+          "name": "Deployment acceptance operator",
+          "role": "admin",
+          "workspaceId": "b84ae17b-e992-40b8-adeb-a8dd477bb675"
+        },
+        "orderId": "BRNO-306",
+        "reservation": {
+          "key": "d24301f0-245a-40ed-b8bb-ab82adc0791a:2",
+          "part": "BRG-42",
+          "status": "held",
+          "version": 2,
+          "quantity": 2,
+          "warehouse": "Brno",
+          "scenarioId": "c6f3451f-0c60-4b0e-a06e-9546881a4243"
+        }
+      }
+    },
+    {
+      "seq": 25,
+      "at": "2026-09-23T14:33:58.468Z",
+      "planId": "d24301f0-245a-40ed-b8bb-ab82adc0791a",
+      "actionId": "d24301f0-245a-40ed-b8bb-ab82adc0791a:2",
+      "kind": "action.dispatching",
+      "message": "Sending BRNO-306 to the carrier with a stable commitment key.",
+      "data": {
+        "actor": {
+          "id": "a1b88fae-5959-4897-a5d7-02ced1bd73c6",
+          "name": "Deployment acceptance operator",
+          "role": "admin",
+          "workspaceId": "b84ae17b-e992-40b8-adeb-a8dd477bb675"
+        },
+        "orderId": "BRNO-306"
+      }
+    },
+    {
+      "seq": 26,
+      "at": "2026-09-23T14:33:58.486Z",
+      "planId": "d24301f0-245a-40ed-b8bb-ab82adc0791a",
+      "actionId": "d24301f0-245a-40ed-b8bb-ab82adc0791a:2",
+      "kind": "action.dispatched",
+      "message": "Carrier committed BRNO-306. This physical action is not rolled back.",
+      "data": {
+        "actor": {
+          "id": "a1b88fae-5959-4897-a5d7-02ced1bd73c6",
+          "name": "Deployment acceptance operator",
+          "role": "admin",
+          "workspaceId": "b84ae17b-e992-40b8-adeb-a8dd477bb675"
+        },
+        "orderId": "BRNO-306",
+        "shipment": {
+          "key": "d24301f0-245a-40ed-b8bb-ab82adc0791a:2",
+          "cost": 30,
+          "laneId": "BRQ-BRQ",
+          "status": "dispatched",
+          "orderId": "BRNO-306",
+          "quantity": 2,
+          "createdAt": "2026-09-23T14:33:58.483Z",
+          "warehouse": "Brno",
+          "scenarioId": "c6f3451f-0c60-4b0e-a06e-9546881a4243"
+        }
+      }
+    },
+    {
+      "seq": 27,
+      "at": "2026-09-23T14:33:58.495Z",
+      "planId": "d24301f0-245a-40ed-b8bb-ab82adc0791a",
+      "actionId": "d24301f0-245a-40ed-b8bb-ab82adc0791a:2",
+      "kind": "action.completed",
+      "message": "BRNO-306 dispatched; inventory movement recorded.",
+      "data": {
+        "actor": {
+          "id": "a1b88fae-5959-4897-a5d7-02ced1bd73c6",
+          "name": "Deployment acceptance operator",
+          "role": "admin",
+          "workspaceId": "b84ae17b-e992-40b8-adeb-a8dd477bb675"
+        },
+        "orderId": "BRNO-306",
+        "shipment": {
+          "key": "d24301f0-245a-40ed-b8bb-ab82adc0791a:2",
+          "cost": 30,
+          "laneId": "BRQ-BRQ",
+          "status": "dispatched",
+          "orderId": "BRNO-306",
+          "quantity": 2,
+          "createdAt": "2026-09-23T14:33:58.483Z",
+          "warehouse": "Brno",
+          "scenarioId": "c6f3451f-0c60-4b0e-a06e-9546881a4243"
+        },
+        "reservation": {
+          "key": "d24301f0-245a-40ed-b8bb-ab82adc0791a:2",
+          "part": "BRG-42",
+          "status": "consumed",
+          "version": 2,
+          "quantity": 2,
+          "warehouse": "Brno",
+          "scenarioId": "c6f3451f-0c60-4b0e-a06e-9546881a4243"
+        }
+      }
+    },
+    {
+      "seq": 28,
+      "at": "2026-09-23T14:33:58.497Z",
+      "planId": "d24301f0-245a-40ed-b8bb-ab82adc0791a",
+      "actionId": null,
+      "kind": "plan.completed",
+      "message": "All transfers in this approved plan were dispatched. Delivery is not simulated.",
+      "data": {
+        "actor": {
+          "id": "a1b88fae-5959-4897-a5d7-02ced1bd73c6",
+          "name": "Deployment acceptance operator",
+          "role": "admin",
+          "workspaceId": "b84ae17b-e992-40b8-adeb-a8dd477bb675"
+        }
+      }
+    }
+  ],
+  "world": {
+    "stock": [
+      {
+        "warehouse": "Brno",
+        "part": "BRG-42",
+        "available": 2,
+        "version": 2
+      },
+      {
+        "warehouse": "Munich",
+        "part": "BRG-42",
+        "available": 4,
+        "version": 2
+      },
+      {
+        "warehouse": "Vienna",
+        "part": "BRG-42",
+        "available": 3,
+        "version": 2
+      }
+    ],
+    "reservations": [
+      {
+        "key": "d24301f0-245a-40ed-b8bb-ab82adc0791a:0",
+        "scenarioId": "c6f3451f-0c60-4b0e-a06e-9546881a4243",
+        "warehouse": "Munich",
+        "part": "BRG-42",
+        "quantity": 4,
+        "version": 2,
+        "status": "consumed"
+      },
+      {
+        "key": "d24301f0-245a-40ed-b8bb-ab82adc0791a:1",
+        "scenarioId": "c6f3451f-0c60-4b0e-a06e-9546881a4243",
+        "warehouse": "Vienna",
+        "part": "BRG-42",
+        "quantity": 3,
+        "version": 2,
+        "status": "consumed"
+      },
+      {
+        "key": "d24301f0-245a-40ed-b8bb-ab82adc0791a:2",
+        "scenarioId": "c6f3451f-0c60-4b0e-a06e-9546881a4243",
+        "warehouse": "Brno",
+        "part": "BRG-42",
+        "quantity": 2,
+        "version": 2,
+        "status": "consumed"
+      }
+    ],
+    "shipments": [
+      {
+        "key": "d24301f0-245a-40ed-b8bb-ab82adc0791a:0",
+        "scenarioId": "c6f3451f-0c60-4b0e-a06e-9546881a4243",
+        "orderId": "LINZ-104",
+        "warehouse": "Munich",
+        "quantity": 4,
+        "laneId": "MUC-LNZ",
+        "cost": 320,
+        "status": "dispatched",
+        "createdAt": "2026-09-23T14:32:39.014Z"
+      },
+      {
+        "key": "d24301f0-245a-40ed-b8bb-ab82adc0791a:1",
+        "scenarioId": "c6f3451f-0c60-4b0e-a06e-9546881a4243",
+        "orderId": "GRAZ-208",
+        "warehouse": "Vienna",
+        "quantity": 3,
+        "laneId": "VIE-GRZ",
+        "cost": 90,
+        "status": "dispatched",
+        "createdAt": "2026-09-23T14:33:58.429Z"
+      },
+      {
+        "key": "d24301f0-245a-40ed-b8bb-ab82adc0791a:2",
+        "scenarioId": "c6f3451f-0c60-4b0e-a06e-9546881a4243",
+        "orderId": "BRNO-306",
+        "warehouse": "Brno",
+        "quantity": 2,
+        "laneId": "BRQ-BRQ",
+        "cost": 30,
+        "status": "dispatched",
+        "createdAt": "2026-09-23T14:33:58.483Z"
+      }
+    ],
+    "carrierLookupAvailable": true
+  },
+  "serviceWarning": null,
+  "runtime": {
+    "mode": "pilot",
+    "demoControls": false,
+    "syntheticProviders": true,
+    "workspaceId": "b84ae17b-e992-40b8-adeb-a8dd477bb675"
+  }
+}

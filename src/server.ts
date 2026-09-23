@@ -54,7 +54,12 @@ app.addHook('onRequest', async (req, reply) => {
     /* reject below */
   }
   if (config.mode === 'pilot') {
-    if (req.headers.host !== new URL(config.appOrigin!).host)
+    const healthcheck =
+      config.healthcheckHostname !== undefined &&
+      req.headers.host === config.healthcheckHostname &&
+      req.method === 'GET' &&
+      req.url === '/api/ready';
+    if (req.headers.host !== new URL(config.appOrigin!).host && !healthcheck)
       return reply.code(403).send({ error: 'Unexpected request host.' });
   } else {
     if (!host || !allowedHosts.has(host))
@@ -153,6 +158,7 @@ async function state(
     runtime: {
       mode: config.mode,
       demoControls: config.mode === 'demo',
+      syntheticProviders: config.syntheticProviders,
       workspaceId: workspaceId(),
     },
   };
