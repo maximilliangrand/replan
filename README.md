@@ -8,7 +8,7 @@ A supplier delay threatens three factory repairs. Replan finds feasible spare-pa
 
 The interesting part comes next: the carrier commits a shipment but its reply disappears. Another customer consumes stock needed by the remaining plan. Replan reconciles the shipment, preserves completed work, rejects stale reservations, and asks for approval of a feasible replacement.
 
-**A synthetic operational application with real persistence, HTTP failures, and process restarts. A private Railway pilot is deployed; inventory and carrier execution remain simulated. No live shipments or customer data.**
+**A synthetic operational application with real persistence, HTTP failures, and process restarts. A temporary private Railway pilot was tested, then intentionally taken offline on 2026-09-23. Inventory and carrier execution remain simulated. No live shipments or customer data.**
 
 ## Run it
 

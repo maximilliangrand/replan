@@ -1,11 +1,22 @@
 # Hosted pilot acceptance — 2026-09-23
 
-Replan is deployed at **https://replan-production.up.railway.app** as a private
-pilot. Access requires the configured operator network and a provisioned account.
-The interface labels both providers as simulated. No real shipment or customer
-acceptance is established by this deployment.
+Replan was temporarily deployed at `https://replan-production.up.railway.app` as a
+private test pilot. Access required the configured operator network and a
+provisioned account. The interface labelled both providers as simulated. These
+checks established no real shipment execution or customer acceptance.
 
-The deployed application, providers and monitor use source revision
+**The temporary deployment was intentionally taken offline on 2026-09-23 after
+validation.** The former URL returned "Application not found" at 15:11:27 UTC.
+This is a historical test record, not an active hosted service. The source,
+audit export and reusable deployment recipe remain available in this repository.
+
+Teardown verification found no active deployments for any of the five services,
+no remaining monitor or backup schedule, and an empty backup list. Railway
+accepted deletion of the project and database volume with a 48-hour cleanup
+window; this records shutdown and scheduled deletion, not completed physical
+storage erasure.
+
+The tested application, providers and monitor used source revision
 [`7162daf`](https://github.com/maximilliangrand/replan/commit/7162daf857cbf6156219aba5733f492dea475763).
 Later documentation commits record the observed results without changing that
 runtime. The [source revision's CI run](https://github.com/maximilliangrand/replan/actions/runs/35871864911)
@@ -13,24 +24,24 @@ passed the contracts/recovery and container smoke jobs. Local verification passe
 185 TypeScript/UI tests, three HTTPS browser scenarios, typecheck, build and
 format checks; CI also runs the Python solver, capacity and backup drills.
 
-## Deployment boundary
+## Tested deployment boundary
 
 - Railway Amsterdam, one application replica, two private synthetic providers,
   PostgreSQL 16.14 with a persistent volume, and a scheduled read-only monitor.
-- Only the application has a public domain. Live metadata confirmed no public
+- Only the application had a public domain. Live metadata confirmed no public
   domain or TCP proxy on the database or providers.
-- The application connects as `replan_runtime`, with no schema creation,
+- The application connected as `replan_runtime`, with no schema creation,
   temporary-table, role-creation, database-creation or superuser privileges.
-  Its environment contains no schema-owner or bootstrap passwords. Startup
-  verifies the schema with `MIGRATE_ON_START=false`.
-- Provider databases have separate owners and credentials. The fresh-cluster
-  bootstrap creates explicit connection grants and refuses existing target names.
-- Native edge rules admit the operator network, then deny other sources. A
-  separate exception permits only the two exact health paths with the monitor's
-  viewer credential. CDN caching is absent.
-- Resource ceilings are 1 GB / 2 vCPU for the app, 0.5 GB / 1 vCPU for the database,
+  Its environment contained no schema-owner or bootstrap passwords. Startup
+  verified the schema with `MIGRATE_ON_START=false`.
+- Provider databases had separate owners and credentials. The fresh-cluster
+  bootstrap created explicit connection grants and refused existing target names.
+- Native edge rules admitted the operator network, then denied other sources. A
+  separate exception permitted only the two exact health paths with the monitor's
+  viewer credential. CDN caching was absent.
+- Resource ceilings were 1 GB / 2 vCPU for the app, 0.5 GB / 1 vCPU for the database,
   0.25 GB / 1 vCPU for each provider, and 0.25 GB / 0.25 vCPU for the monitor.
-  These are configured ceilings, not measured utilization or availability promises.
+  These were configured ceilings, not measured utilization or availability promises.
 
 ## Actual HTTPS and recovery checks
 
@@ -58,7 +69,7 @@ reservations and shipments.
    dispatches, $440 committed cost, zero unresolved plans and 27 audit events**.
    The browser download passed the offline verifier. No browser page errors
    occurred.
-6. Both acceptance identities were revoked; their keys subsequently returned 401. The acceptance audit remains stored. No test credential is published.
+6. Both acceptance identities were revoked; their keys subsequently returned 401. The acceptance audit export is preserved in this repository. No test credential is published.
 
 The [actual synthetic audit export](evidence/hosted-browser-recovery.json) includes
 both failed lookup and successful reconciliation. Verify it without a running
@@ -84,19 +95,19 @@ credential checks.
 
 The read-only probe ran outside the operator network and exited 0 with readiness
 true and no stale, executing or cancellation-pending work. The deployed monitor
-is configured to run every five minutes with a dedicated viewer account, a
-10-second request timeout, and no database or provider credential. It observes
-the operator workspace, not every workspace. It does not initiate recovery.
+was configured to run every five minutes with a dedicated viewer account, a
+10-second request timeout, and no database or provider credential. It observed
+the operator workspace, not every workspace. It did not initiate recovery.
 Its own hosted run at 14:35:18 UTC reported healthy and exited successfully;
-Railway reported the next run at 14:40 UTC. Alert delivery is not configured or
+Railway reported the next run at 14:40 UTC. Alert delivery was not configured or
 tested.
 
 ## Backup and restore checks
 
 A native Railway volume snapshot was created and its backup entry verified at
 14:27:20 UTC. Daily and weekly backup schedules were configured and read back,
-with reported retention of six and 27 days respectively. Future scheduled
-execution and retention expiry have not yet been observed.
+with reported retention of six and 27 days respectively. Scheduled execution and
+retention expiry were not observed.
 
 While operator mutations were paused, PostgreSQL 16.14 produced separate logical
 archives of the three actual hosted databases. Table fingerprints were stable
@@ -117,7 +128,7 @@ acceptance; the restored provider commitment tables were empty at that point.
 The separate repository backup drill covers a synthetic approval and unknown
 dispatch.
 
-The retained native snapshot was **not restored**. Logical restore was tested on
+The native snapshot created for this test was **not restored**. Logical restore was tested on
 the existing host, not a replacement service or region; there is no tested
 point-in-time recovery, recovery-time SLA or distributed-snapshot guarantee.
 Restoring application data cannot undo provider actions or preserve later key
@@ -130,13 +141,11 @@ The temporary bootstrap service and its privileged environment were removed
 after provisioning. The temporary SSH registration, key files and source upload
 archive were also removed.
 
-Deployment credentials and operator login instructions are kept in owner-only,
-ignored local files and Railway's service variables. Neither the operator's
-network address nor credentials are part of this repository. The operator
-network rule needs an authenticated Railway change when that network changes;
-forwarding headers must not be used as an access workaround.
+During the test, deployment credentials and operator login instructions were
+kept in owner-only, ignored local files and Railway's service variables. Neither
+the operator's network address nor credentials are part of this repository.
 
-The pilot has one database host, no failover and no production SLA. It uses
+The test pilot had one database host, no failover and no production SLA. It used
 synthetic costs, deadlines and carrier semantics. Provider selection, contract
 validation, representative capacity, practitioner acceptance and alert delivery
 remain prerequisites for live operational use. See the [remaining gates](pilot-validation.md)
