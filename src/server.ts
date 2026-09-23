@@ -26,6 +26,7 @@ import { makeScenario } from './scenario.js';
 import { registerAuth } from './auth.js';
 import { asPrincipal, demoPrincipal, workspaceId } from './workspace.js';
 import { operationInput } from './operations.js';
+import { operationHealth } from './monitoring.js';
 
 const app = Fastify({
   logger:
@@ -191,6 +192,7 @@ app.get('/api/ready', async (_req, reply) => {
   }
 });
 app.get('/api/state', async () => state());
+app.get('/api/operations/health', async () => operationHealth());
 app.post('/api/operations', async (req) => {
   const { scenario } = operationInput.parse(req.body);
   await withLock(async (db) => {

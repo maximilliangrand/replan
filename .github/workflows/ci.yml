@@ -45,6 +45,15 @@ jobs:
       - run: npm run build
       - run: npm run format:check
       - run: npm test
+      - name: Install HTTPS browser acceptance tools
+        run: |
+          npx playwright install --with-deps chromium
+          curl --fail --silent --show-error --location https://github.com/caddyserver/caddy/releases/download/v2.11.4/caddy_2.11.4_linux_amd64.tar.gz --output /tmp/caddy.tar.gz
+          echo '527fbf917c39189a1e3b31d34fa955601680b2d5c8055d2a87b8b9588dec7bb9  /tmp/caddy.tar.gz' | sha256sum --check
+          mkdir -p .local/validation/caddy
+          tar -xzf /tmp/caddy.tar.gz -C .local/validation/caddy caddy
+      - run: npm run test:browser
+      - run: npm run test:capacity
       - run: npm run backup:drill
       - run: npm run test:solver
       - run: npm run evaluate

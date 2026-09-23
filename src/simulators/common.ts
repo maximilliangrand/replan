@@ -39,7 +39,7 @@ export function service(databaseURL: string, options: ServiceOptions = {}) {
     }
     // Hash both values to fixed-size buffers before comparison; do not expose a
     // token-length-dependent comparison or put credentials in logs/errors.
-    if (options.token && request.url.split('?')[0] !== '/health') {
+    if (options.token) {
       const expected = createHash('sha256').update(`Bearer ${options.token}`).digest();
       const actual = createHash('sha256')
         .update(request.headers.authorization ?? '')

@@ -23,6 +23,17 @@ The local bootstrap was exercised from a checkout path containing spaces and cor
 
 The new phase adds PostgreSQL-backed authentication/session tests, real-HTTP workspace and permission tests, migration preservation checks, browser-component interaction tests, terminal-cancellation races, and actual process-kill recovery after cancellation intent. Local validation passed 139 TypeScript/browser tests, 15 Python tests, the build, dependency audit, and the synthetic backup/restore drill. The current CI run is the authority for the exact branch revision and test outcome. [Engineering acceptance and remaining external validation](pilot-validation.md) records the boundary of these checks.
 
+## Local pilot acceptance, 2026-09-23
+
+- All 156 TypeScript/UI tests and 15 Python tests pass. The TypeScript suite and three new Chromium browser scenarios also pass on Node 22.23.2, the CI runtime major version.
+- The actual pilot application runs behind Caddy with HTTPS, a restricted database role and independently persisted synthetic providers. Browser tests cover login, secure cookies, viewer denial, key rotation, server-side logout, lost-response recovery and provider credential rotation. Final recovery evidence contains three unique confirmed dispatches and passes the offline verifier. See [browser acceptance](browser-acceptance.md) for the isolated test-certificate boundary.
+- The credential-rotation scenario exposed a readiness bug: unauthenticated provider health checks could report ready when Replan held a stale token. Provider health now authenticates the configured token, and the browser test verifies readiness stays unavailable until reconnection.
+- A read-only, workspace-scoped [monitoring probe](operations.md) reports dependency failures and stale unresolved, executing or cancellation-pending plans. Tests exercise real HTTPS, authentication, isolation, bounded responses, timeouts and sanitized failure output. No hosted scheduler or alert delivery has been configured.
+- [Capacity acceptance](capacity.md) records 108 expected HTTP outcomes across four concurrent workspaces, each with 100 orders and 500 lanes. All four proposals are optimal; measured planning p95 is 1,627.99 ms on the documented local machine. The report includes source hashes and successful cleanup of all owned resources. This finite workload does not measure sustained dispatch throughput or establish a production SLA.
+- Typecheck, production build, formatting and dependency audit pass; the installed lockfile has no reported vulnerabilities at this check.
+
+These checks use synthetic data and loopback infrastructure. No real inventory/carrier adapter, public deployment, hosted monitoring or customer acceptance has been validated. The [provider assessment](provider-assessment.md) identifies contract differences that must be resolved before enabling external execution.
+
 ## Reproduce
 
 ```sh
@@ -40,4 +51,4 @@ The GitHub workflow runs the same contracts on Linux/Node 22/PostgreSQL 16 and s
 
 ## Remaining validation
 
-No operations practitioner has reviewed the domain assumptions or completed the acceptance drill. No real inventory/carrier integration, customer pilot, public hosting, or production load validation has occurred. Data volumes are deliberately small. The authored evaluation cases do not establish generalization to real disruptions. The pilot foundation adds provisioned identity and application-enforced workspace permissions; it has not received an independent security assessment. See [pilot validation gates](pilot-validation.md).
+No operations practitioner has reviewed the domain assumptions or completed the acceptance drill. No real inventory/carrier integration, customer pilot, public hosting, or production load validation has occurred. Data volumes are finite and authored; the evaluation and capacity cases do not establish generalization to real disruptions. The pilot foundation adds provisioned identity and application-enforced workspace permissions; it has not received an independent security assessment. See [pilot validation gates](pilot-validation.md).

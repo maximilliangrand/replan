@@ -1,0 +1,1059 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-09-23T13:12:00.031Z",
+  "valid": true,
+  "scope": "Bounded synthetic local pilot HTTP acceptance; not a throughput limit, production SLA, TLS test, or external-provider validation.",
+  "environment": {
+    "node": "v26.7.0",
+    "platform": "darwin",
+    "osRelease": "25.6.0",
+    "arch": "arm64",
+    "cpuModel": "Apple M4",
+    "logicalCpus": 10,
+    "memoryGiB": 16,
+    "postgres": "16.14 (Homebrew)",
+    "runtimeRole": "restricted non-owner",
+    "providerPlacement": "same-host in-process simulators, separate databases"
+  },
+  "workload": {
+    "workspaces": 4,
+    "ordersPerWorkspace": 100,
+    "lanesPerWorkspace": 500,
+    "stockRowsPerWorkspace": 50,
+    "feasibleTransfersPerWorkspace": 5000,
+    "clientTimeoutMs": 15000,
+    "independentConcurrency": 4,
+    "sameWorkspaceConcurrency": 12,
+    "planningStrategy": "optimized",
+    "warmup": "imports OR-Tools before measured requests; planning requests still include child-process startup",
+    "transport": "loopback HTTP with pilot Host/Origin headers; TLS ingress excluded"
+  },
+  "acceptance": {
+    "requireZeroInvalidResponses": true,
+    "requireZeroCrossWorkspaceLeaks": true,
+    "requireAllFinalExportsConsistent": true,
+    "expectedContentionStatusCodes": [
+      200,
+      409
+    ],
+    "expectedCrossWorkspaceStatusCode": 409,
+    "latencyRule": "Every request must finish within the predeclared 15000ms client timeout; percentiles are observations, not promised limits."
+  },
+  "sourceSha256": {
+    "scripts/capacity.mts": "6b10b6443f16ec70b0b8b2acd562d6da9d1576385b02c3b88db367abb8233dff",
+    "src/server.ts": "0008f7e65761e07d512ea54b7c7bd478b0999dbcb88e28890e9419e93854c5e7",
+    "src/planner.ts": "5f3415eba87db724700095119cff88c948902b5f3e0ed5b7e47f200f3d4e2fa8",
+    "src/db.ts": "122822618308def5d05e1aaf78dcb5d05fffd7effdf1874a15b1c0aad3b69f7a",
+    "src/auth.ts": "04f00306e7736267411c2b56a01b9d47378e175e7a0bdafd6d3c0687dd972f1c",
+    "src/providers.ts": "084de91406d801f9102f1821e022945dd03204b7b19d5d277338d4a073ffcdfd",
+    "src/simulators/common.ts": "bb25786beaa44a981c4c4db43e0c3f70326a046e98962f92bfe197e7f3902848",
+    "src/simulators/inventory.ts": "71522c9937523a959961df705c10bdc0d23eb13cdbd530cc80a5011ea876d175",
+    "src/simulators/carrier.ts": "88018c3c0ec016c5fd3ad4a6791fe1a3dd2e254d54d6591f4d6aebc667242426",
+    "src/config.ts": "72b12f264c22c685d3f756f2c48aaa5dc62887a78cb553d273e238cf9e0c2e63",
+    "src/workspace.ts": "b7f5f92513737f70f3bbe8d8a07b142579117e10b0201ec3462b1bf1ff647e3f",
+    "src/monitoring.ts": "f2c7365d7d7b6d596e5086a4a9d81a62acb512fac9a661c6db5218232dd60ed5",
+    "deploy/runtime-grants.sql": "a89d736799f6ea072610d3dc37a87ad3e3c2677306643f356510c40470ef647a",
+    "package-lock.json": "c6ea152ebde8eb20bcbd4548be151612edb894b90a1d50567a59f1c3446e9662",
+    "solver/main.py": "ddee5122469074d3f2607e9b25a45e361501510fb15d96d4f1f7eebf7688c5cc",
+    "solver/uv.lock": "82c8975cdb2fd639c4a33970076fa64ff4b588110e6e443d66acd4a3856badb8"
+  },
+  "phases": {
+    "import": {
+      "requests": 4,
+      "p50Ms": 32.71,
+      "p95Ms": 34.64,
+      "maxMs": 34.64,
+      "failures": 0,
+      "statusCodes": {
+        "200": 4
+      }
+    },
+    "planning": {
+      "requests": 4,
+      "p50Ms": 1612.61,
+      "p95Ms": 1627.99,
+      "maxMs": 1627.99,
+      "failures": 0,
+      "statusCodes": {
+        "200": 4
+      }
+    },
+    "state_reads": {
+      "requests": 40,
+      "p50Ms": 7.28,
+      "p95Ms": 13.11,
+      "maxMs": 14.87,
+      "failures": 0,
+      "statusCodes": {
+        "200": 40
+      }
+    },
+    "audit_exports": {
+      "requests": 40,
+      "p50Ms": 10.55,
+      "p95Ms": 15.51,
+      "maxMs": 21.09,
+      "failures": 0,
+      "statusCodes": {
+        "200": 40
+      }
+    },
+    "same_workspace_contention": {
+      "requests": 12,
+      "p50Ms": 3.52,
+      "p95Ms": 8.69,
+      "maxMs": 8.69,
+      "failures": 0,
+      "statusCodes": {
+        "200": 1,
+        "409": 11
+      }
+    },
+    "cross_workspace_denial": {
+      "requests": 4,
+      "p50Ms": 3.91,
+      "p95Ms": 3.97,
+      "maxMs": 3.97,
+      "failures": 0,
+      "statusCodes": {
+        "409": 4
+      }
+    },
+    "final_export": {
+      "requests": 4,
+      "p50Ms": 8.67,
+      "p95Ms": 11.1,
+      "maxMs": 11.1,
+      "failures": 0,
+      "statusCodes": {
+        "200": 4
+      }
+    }
+  },
+  "samples": [
+    {
+      "phase": "import",
+      "workspace": 0,
+      "route": "/operations",
+      "status": 200,
+      "ms": 31,
+      "valid": true
+    },
+    {
+      "phase": "import",
+      "workspace": 1,
+      "route": "/operations",
+      "status": 200,
+      "ms": 32.71,
+      "valid": true
+    },
+    {
+      "phase": "import",
+      "workspace": 2,
+      "route": "/operations",
+      "status": 200,
+      "ms": 33.25,
+      "valid": true
+    },
+    {
+      "phase": "import",
+      "workspace": 3,
+      "route": "/operations",
+      "status": 200,
+      "ms": 34.64,
+      "valid": true
+    },
+    {
+      "phase": "planning",
+      "workspace": 2,
+      "route": "/plans",
+      "status": 200,
+      "ms": 1592.27,
+      "valid": true,
+      "solverStatus": "OPTIMAL",
+      "solveMs": 1248.063,
+      "plannedOrders": 100
+    },
+    {
+      "phase": "planning",
+      "workspace": 3,
+      "route": "/plans",
+      "status": 200,
+      "ms": 1612.61,
+      "valid": true,
+      "solverStatus": "OPTIMAL",
+      "solveMs": 1273.007,
+      "plannedOrders": 100
+    },
+    {
+      "phase": "planning",
+      "workspace": 0,
+      "route": "/plans",
+      "status": 200,
+      "ms": 1622.58,
+      "valid": true,
+      "solverStatus": "OPTIMAL",
+      "solveMs": 1268.09,
+      "plannedOrders": 100
+    },
+    {
+      "phase": "planning",
+      "workspace": 1,
+      "route": "/plans",
+      "status": 200,
+      "ms": 1627.99,
+      "valid": true,
+      "solverStatus": "OPTIMAL",
+      "solveMs": 1283.126,
+      "plannedOrders": 100
+    },
+    {
+      "phase": "state_reads",
+      "workspace": 3,
+      "route": "/state",
+      "status": 200,
+      "ms": 6.99,
+      "valid": true
+    },
+    {
+      "phase": "state_reads",
+      "workspace": 1,
+      "route": "/state",
+      "status": 200,
+      "ms": 8.13,
+      "valid": true
+    },
+    {
+      "phase": "state_reads",
+      "workspace": 0,
+      "route": "/state",
+      "status": 200,
+      "ms": 10.26,
+      "valid": true
+    },
+    {
+      "phase": "state_reads",
+      "workspace": 2,
+      "route": "/state",
+      "status": 200,
+      "ms": 11.47,
+      "valid": true
+    },
+    {
+      "phase": "audit_exports",
+      "workspace": 3,
+      "route": "/audit",
+      "status": 200,
+      "ms": 13.1,
+      "valid": true
+    },
+    {
+      "phase": "audit_exports",
+      "workspace": 0,
+      "route": "/audit",
+      "status": 200,
+      "ms": 15.51,
+      "valid": true
+    },
+    {
+      "phase": "audit_exports",
+      "workspace": 1,
+      "route": "/audit",
+      "status": 200,
+      "ms": 21.09,
+      "valid": true
+    },
+    {
+      "phase": "audit_exports",
+      "workspace": 2,
+      "route": "/audit",
+      "status": 200,
+      "ms": 21.03,
+      "valid": true
+    },
+    {
+      "phase": "state_reads",
+      "workspace": 3,
+      "route": "/state",
+      "status": 200,
+      "ms": 13.43,
+      "valid": true
+    },
+    {
+      "phase": "state_reads",
+      "workspace": 0,
+      "route": "/state",
+      "status": 200,
+      "ms": 10.21,
+      "valid": true
+    },
+    {
+      "phase": "state_reads",
+      "workspace": 1,
+      "route": "/state",
+      "status": 200,
+      "ms": 7.83,
+      "valid": true
+    },
+    {
+      "phase": "state_reads",
+      "workspace": 2,
+      "route": "/state",
+      "status": 200,
+      "ms": 5.16,
+      "valid": true
+    },
+    {
+      "phase": "audit_exports",
+      "workspace": 3,
+      "route": "/audit",
+      "status": 200,
+      "ms": 8.09,
+      "valid": true
+    },
+    {
+      "phase": "audit_exports",
+      "workspace": 0,
+      "route": "/audit",
+      "status": 200,
+      "ms": 10.66,
+      "valid": true
+    },
+    {
+      "phase": "audit_exports",
+      "workspace": 1,
+      "route": "/audit",
+      "status": 200,
+      "ms": 11.48,
+      "valid": true
+    },
+    {
+      "phase": "audit_exports",
+      "workspace": 2,
+      "route": "/audit",
+      "status": 200,
+      "ms": 12.54,
+      "valid": true
+    },
+    {
+      "phase": "state_reads",
+      "workspace": 3,
+      "route": "/state",
+      "status": 200,
+      "ms": 11.87,
+      "valid": true
+    },
+    {
+      "phase": "state_reads",
+      "workspace": 0,
+      "route": "/state",
+      "status": 200,
+      "ms": 7.96,
+      "valid": true
+    },
+    {
+      "phase": "state_reads",
+      "workspace": 1,
+      "route": "/state",
+      "status": 200,
+      "ms": 8.21,
+      "valid": true
+    },
+    {
+      "phase": "state_reads",
+      "workspace": 2,
+      "route": "/state",
+      "status": 200,
+      "ms": 7.09,
+      "valid": true
+    },
+    {
+      "phase": "audit_exports",
+      "workspace": 3,
+      "route": "/audit",
+      "status": 200,
+      "ms": 9.83,
+      "valid": true
+    },
+    {
+      "phase": "audit_exports",
+      "workspace": 0,
+      "route": "/audit",
+      "status": 200,
+      "ms": 10.55,
+      "valid": true
+    },
+    {
+      "phase": "state_reads",
+      "workspace": 3,
+      "route": "/state",
+      "status": 200,
+      "ms": 4.39,
+      "valid": true
+    },
+    {
+      "phase": "audit_exports",
+      "workspace": 1,
+      "route": "/audit",
+      "status": 200,
+      "ms": 12.51,
+      "valid": true
+    },
+    {
+      "phase": "audit_exports",
+      "workspace": 2,
+      "route": "/audit",
+      "status": 200,
+      "ms": 13.54,
+      "valid": true
+    },
+    {
+      "phase": "state_reads",
+      "workspace": 0,
+      "route": "/state",
+      "status": 200,
+      "ms": 9.25,
+      "valid": true
+    },
+    {
+      "phase": "audit_exports",
+      "workspace": 3,
+      "route": "/audit",
+      "status": 200,
+      "ms": 9.66,
+      "valid": true
+    },
+    {
+      "phase": "state_reads",
+      "workspace": 1,
+      "route": "/state",
+      "status": 200,
+      "ms": 10.48,
+      "valid": true
+    },
+    {
+      "phase": "state_reads",
+      "workspace": 3,
+      "route": "/state",
+      "status": 200,
+      "ms": 5.09,
+      "valid": true
+    },
+    {
+      "phase": "audit_exports",
+      "workspace": 0,
+      "route": "/audit",
+      "status": 200,
+      "ms": 10.75,
+      "valid": true
+    },
+    {
+      "phase": "state_reads",
+      "workspace": 2,
+      "route": "/state",
+      "status": 200,
+      "ms": 14.87,
+      "valid": true
+    },
+    {
+      "phase": "audit_exports",
+      "workspace": 1,
+      "route": "/audit",
+      "status": 200,
+      "ms": 13.31,
+      "valid": true
+    },
+    {
+      "phase": "audit_exports",
+      "workspace": 3,
+      "route": "/audit",
+      "status": 200,
+      "ms": 13.26,
+      "valid": true
+    },
+    {
+      "phase": "state_reads",
+      "workspace": 0,
+      "route": "/state",
+      "status": 200,
+      "ms": 13.11,
+      "valid": true
+    },
+    {
+      "phase": "state_reads",
+      "workspace": 1,
+      "route": "/state",
+      "status": 200,
+      "ms": 6.45,
+      "valid": true
+    },
+    {
+      "phase": "audit_exports",
+      "workspace": 2,
+      "route": "/audit",
+      "status": 200,
+      "ms": 15.49,
+      "valid": true
+    },
+    {
+      "phase": "state_reads",
+      "workspace": 3,
+      "route": "/state",
+      "status": 200,
+      "ms": 7.52,
+      "valid": true
+    },
+    {
+      "phase": "audit_exports",
+      "workspace": 0,
+      "route": "/audit",
+      "status": 200,
+      "ms": 6.71,
+      "valid": true
+    },
+    {
+      "phase": "state_reads",
+      "workspace": 2,
+      "route": "/state",
+      "status": 200,
+      "ms": 6.51,
+      "valid": true
+    },
+    {
+      "phase": "audit_exports",
+      "workspace": 1,
+      "route": "/audit",
+      "status": 200,
+      "ms": 10.01,
+      "valid": true
+    },
+    {
+      "phase": "state_reads",
+      "workspace": 0,
+      "route": "/state",
+      "status": 200,
+      "ms": 7.04,
+      "valid": true
+    },
+    {
+      "phase": "audit_exports",
+      "workspace": 3,
+      "route": "/audit",
+      "status": 200,
+      "ms": 10.51,
+      "valid": true
+    },
+    {
+      "phase": "audit_exports",
+      "workspace": 2,
+      "route": "/audit",
+      "status": 200,
+      "ms": 8.54,
+      "valid": true
+    },
+    {
+      "phase": "state_reads",
+      "workspace": 1,
+      "route": "/state",
+      "status": 200,
+      "ms": 8.76,
+      "valid": true
+    },
+    {
+      "phase": "audit_exports",
+      "workspace": 0,
+      "route": "/audit",
+      "status": 200,
+      "ms": 8.83,
+      "valid": true
+    },
+    {
+      "phase": "state_reads",
+      "workspace": 3,
+      "route": "/state",
+      "status": 200,
+      "ms": 8,
+      "valid": true
+    },
+    {
+      "phase": "state_reads",
+      "workspace": 2,
+      "route": "/state",
+      "status": 200,
+      "ms": 7.92,
+      "valid": true
+    },
+    {
+      "phase": "audit_exports",
+      "workspace": 1,
+      "route": "/audit",
+      "status": 200,
+      "ms": 7.43,
+      "valid": true
+    },
+    {
+      "phase": "state_reads",
+      "workspace": 0,
+      "route": "/state",
+      "status": 200,
+      "ms": 5.72,
+      "valid": true
+    },
+    {
+      "phase": "audit_exports",
+      "workspace": 3,
+      "route": "/audit",
+      "status": 200,
+      "ms": 8.8,
+      "valid": true
+    },
+    {
+      "phase": "state_reads",
+      "workspace": 1,
+      "route": "/state",
+      "status": 200,
+      "ms": 5.63,
+      "valid": true
+    },
+    {
+      "phase": "audit_exports",
+      "workspace": 2,
+      "route": "/audit",
+      "status": 200,
+      "ms": 8.59,
+      "valid": true
+    },
+    {
+      "phase": "state_reads",
+      "workspace": 3,
+      "route": "/state",
+      "status": 200,
+      "ms": 5.64,
+      "valid": true
+    },
+    {
+      "phase": "audit_exports",
+      "workspace": 0,
+      "route": "/audit",
+      "status": 200,
+      "ms": 11.55,
+      "valid": true
+    },
+    {
+      "phase": "state_reads",
+      "workspace": 2,
+      "route": "/state",
+      "status": 200,
+      "ms": 5.84,
+      "valid": true
+    },
+    {
+      "phase": "audit_exports",
+      "workspace": 1,
+      "route": "/audit",
+      "status": 200,
+      "ms": 10.69,
+      "valid": true
+    },
+    {
+      "phase": "audit_exports",
+      "workspace": 3,
+      "route": "/audit",
+      "status": 200,
+      "ms": 7.52,
+      "valid": true
+    },
+    {
+      "phase": "state_reads",
+      "workspace": 0,
+      "route": "/state",
+      "status": 200,
+      "ms": 7.28,
+      "valid": true
+    },
+    {
+      "phase": "state_reads",
+      "workspace": 1,
+      "route": "/state",
+      "status": 200,
+      "ms": 4.96,
+      "valid": true
+    },
+    {
+      "phase": "audit_exports",
+      "workspace": 2,
+      "route": "/audit",
+      "status": 200,
+      "ms": 10.28,
+      "valid": true
+    },
+    {
+      "phase": "state_reads",
+      "workspace": 3,
+      "route": "/state",
+      "status": 200,
+      "ms": 7.19,
+      "valid": true
+    },
+    {
+      "phase": "audit_exports",
+      "workspace": 0,
+      "route": "/audit",
+      "status": 200,
+      "ms": 7.14,
+      "valid": true
+    },
+    {
+      "phase": "audit_exports",
+      "workspace": 1,
+      "route": "/audit",
+      "status": 200,
+      "ms": 11.54,
+      "valid": true
+    },
+    {
+      "phase": "state_reads",
+      "workspace": 2,
+      "route": "/state",
+      "status": 200,
+      "ms": 10.34,
+      "valid": true
+    },
+    {
+      "phase": "state_reads",
+      "workspace": 0,
+      "route": "/state",
+      "status": 200,
+      "ms": 10.43,
+      "valid": true
+    },
+    {
+      "phase": "state_reads",
+      "workspace": 1,
+      "route": "/state",
+      "status": 200,
+      "ms": 4.96,
+      "valid": true
+    },
+    {
+      "phase": "audit_exports",
+      "workspace": 3,
+      "route": "/audit",
+      "status": 200,
+      "ms": 15.05,
+      "valid": true
+    },
+    {
+      "phase": "audit_exports",
+      "workspace": 2,
+      "route": "/audit",
+      "status": 200,
+      "ms": 11.15,
+      "valid": true
+    },
+    {
+      "phase": "audit_exports",
+      "workspace": 1,
+      "route": "/audit",
+      "status": 200,
+      "ms": 8.7,
+      "valid": true
+    },
+    {
+      "phase": "audit_exports",
+      "workspace": 0,
+      "route": "/audit",
+      "status": 200,
+      "ms": 10.71,
+      "valid": true
+    },
+    {
+      "phase": "state_reads",
+      "workspace": 3,
+      "route": "/state",
+      "status": 200,
+      "ms": 9.06,
+      "valid": true
+    },
+    {
+      "phase": "state_reads",
+      "workspace": 2,
+      "route": "/state",
+      "status": 200,
+      "ms": 5.26,
+      "valid": true
+    },
+    {
+      "phase": "state_reads",
+      "workspace": 1,
+      "route": "/state",
+      "status": 200,
+      "ms": 4.01,
+      "valid": true
+    },
+    {
+      "phase": "state_reads",
+      "workspace": 0,
+      "route": "/state",
+      "status": 200,
+      "ms": 4.39,
+      "valid": true
+    },
+    {
+      "phase": "audit_exports",
+      "workspace": 3,
+      "route": "/audit",
+      "status": 200,
+      "ms": 7.1,
+      "valid": true
+    },
+    {
+      "phase": "audit_exports",
+      "workspace": 2,
+      "route": "/audit",
+      "status": 200,
+      "ms": 8,
+      "valid": true
+    },
+    {
+      "phase": "audit_exports",
+      "workspace": 1,
+      "route": "/audit",
+      "status": 200,
+      "ms": 10.56,
+      "valid": true
+    },
+    {
+      "phase": "audit_exports",
+      "workspace": 0,
+      "route": "/audit",
+      "status": 200,
+      "ms": 10.14,
+      "valid": true
+    },
+    {
+      "phase": "state_reads",
+      "workspace": 2,
+      "route": "/state",
+      "status": 200,
+      "ms": 5.78,
+      "valid": true
+    },
+    {
+      "phase": "audit_exports",
+      "workspace": 2,
+      "route": "/audit",
+      "status": 200,
+      "ms": 4.65,
+      "valid": true
+    },
+    {
+      "phase": "same_workspace_contention",
+      "workspace": 0,
+      "route": "/observe",
+      "status": 409,
+      "ms": 2.42,
+      "valid": true
+    },
+    {
+      "phase": "same_workspace_contention",
+      "workspace": 0,
+      "route": "/observe",
+      "status": 409,
+      "ms": 2.52,
+      "valid": true
+    },
+    {
+      "phase": "same_workspace_contention",
+      "workspace": 0,
+      "route": "/observe",
+      "status": 409,
+      "ms": 2.75,
+      "valid": true
+    },
+    {
+      "phase": "same_workspace_contention",
+      "workspace": 0,
+      "route": "/observe",
+      "status": 409,
+      "ms": 3.52,
+      "valid": true
+    },
+    {
+      "phase": "same_workspace_contention",
+      "workspace": 0,
+      "route": "/observe",
+      "status": 409,
+      "ms": 3.39,
+      "valid": true
+    },
+    {
+      "phase": "same_workspace_contention",
+      "workspace": 0,
+      "route": "/observe",
+      "status": 409,
+      "ms": 3.52,
+      "valid": true
+    },
+    {
+      "phase": "same_workspace_contention",
+      "workspace": 0,
+      "route": "/observe",
+      "status": 409,
+      "ms": 3.57,
+      "valid": true
+    },
+    {
+      "phase": "same_workspace_contention",
+      "workspace": 0,
+      "route": "/observe",
+      "status": 409,
+      "ms": 3.74,
+      "valid": true
+    },
+    {
+      "phase": "same_workspace_contention",
+      "workspace": 0,
+      "route": "/observe",
+      "status": 409,
+      "ms": 3.81,
+      "valid": true
+    },
+    {
+      "phase": "same_workspace_contention",
+      "workspace": 0,
+      "route": "/observe",
+      "status": 409,
+      "ms": 3.86,
+      "valid": true
+    },
+    {
+      "phase": "same_workspace_contention",
+      "workspace": 0,
+      "route": "/observe",
+      "status": 409,
+      "ms": 3.85,
+      "valid": true
+    },
+    {
+      "phase": "same_workspace_contention",
+      "workspace": 0,
+      "route": "/observe",
+      "status": 200,
+      "ms": 8.69,
+      "valid": true
+    },
+    {
+      "phase": "cross_workspace_denial",
+      "workspace": 3,
+      "route": "/plans/:id/approve",
+      "status": 409,
+      "ms": 3.8,
+      "valid": true
+    },
+    {
+      "phase": "cross_workspace_denial",
+      "workspace": 0,
+      "route": "/plans/:id/approve",
+      "status": 409,
+      "ms": 3.97,
+      "valid": true
+    },
+    {
+      "phase": "cross_workspace_denial",
+      "workspace": 1,
+      "route": "/plans/:id/approve",
+      "status": 409,
+      "ms": 3.92,
+      "valid": true
+    },
+    {
+      "phase": "cross_workspace_denial",
+      "workspace": 2,
+      "route": "/plans/:id/approve",
+      "status": 409,
+      "ms": 3.91,
+      "valid": true
+    },
+    {
+      "phase": "final_export",
+      "workspace": 1,
+      "route": "/audit",
+      "status": 200,
+      "ms": 6.2,
+      "valid": true
+    },
+    {
+      "phase": "final_export",
+      "workspace": 0,
+      "route": "/audit",
+      "status": 200,
+      "ms": 8.67,
+      "valid": true
+    },
+    {
+      "phase": "final_export",
+      "workspace": 2,
+      "route": "/audit",
+      "status": 200,
+      "ms": 9.81,
+      "valid": true
+    },
+    {
+      "phase": "final_export",
+      "workspace": 3,
+      "route": "/audit",
+      "status": 200,
+      "ms": 11.1,
+      "valid": true
+    }
+  ],
+  "errors": [],
+  "cleanup": {
+    "ownedDatabasesCreated": 3,
+    "attemptedOnlyOwnedNames": true,
+    "successful": true,
+    "steps": [
+      {
+        "resource": "subprocess 1",
+        "successful": true
+      },
+      {
+        "resource": "provider 1",
+        "successful": true
+      },
+      {
+        "resource": "provider 2",
+        "successful": true
+      },
+      {
+        "resource": "database pool 1",
+        "successful": true
+      },
+      {
+        "resource": "database pool 2",
+        "successful": true
+      },
+      {
+        "resource": "owned database 1",
+        "successful": true
+      },
+      {
+        "resource": "owned database 2",
+        "successful": true
+      },
+      {
+        "resource": "owned database 3",
+        "successful": true
+      },
+      {
+        "resource": "owned runtime role",
+        "successful": true
+      },
+      {
+        "resource": "administration pool",
+        "successful": true
+      }
+    ]
+  }
+}

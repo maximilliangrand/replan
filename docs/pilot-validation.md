@@ -34,11 +34,13 @@ The adapter is trusted to attest these guarantees. The offline export verifier c
 
 ## Deployment acceptance still required
 
-- Start the chosen host behind its real HTTPS ingress and verify browser login/logout, role denial and cookie behaviour from the allowed network.
-- Test the chosen secret storage and application database role, rotate an operator key and the provider token, and confirm logs contain no credentials.
+- Local Caddy/Chromium HTTPS acceptance now verifies browser login/logout, role denial and secure-cookie behaviour. Repeat [browser acceptance](browser-acceptance.md) on the chosen host from its actual allowed network.
+- The restricted runtime database role, operator-key rotation, provider-token rotation and log redaction are now exercised locally. Verify the chosen host secret store and its rotation procedure.
 - Set an acceptable recovery point and recovery time, configure managed backups for all independently owned stores, and restore them in the target environment. The included synthetic drill is not a consistent distributed snapshot.
-- Measure representative input sizes and concurrent operators. Current input bounds are 100 orders and 500 lanes; independent workspace locks are concurrency isolation, not a throughput result.
-- Configure alerting for readiness failures and operations that remain uncertain. Recovery is operator-triggered; no unattended retry worker is implied.
+- [Capacity acceptance](capacity.md) now measures four concurrent synthetic workspaces at 100 orders and 500 lanes each, including isolation and contention. Repeat with representative customer inputs and target-host/provider latency before setting capacity promises.
+- A [read-only monitoring probe](operations.md) now detects readiness failures and stale unresolved/executing/cancellation states. Connect its exit status to the chosen host scheduler and alert destination, then test delivery. No hosted alerting is configured; recovery stays operator-triggered.
 - Have an operations practitioner challenge priorities, costs, deadlines, cancellation policy and the replacement-approval workflow. Run the [acceptance drill](product-brief.md) and record observations.
+
+The [provider assessment](provider-assessment.md) found no drop-in vendor pair that establishes every current execution and cancellation guarantee. Provider selection and lifecycle mapping must precede a connected adapter.
 
 No live operational deployment or customer acceptance has been performed. Advancement through these gates requires the selected environment and provider evidence, not a larger synthetic test count.

@@ -275,6 +275,34 @@ afterAll(async () => {
 });
 
 describe('private pilot HTTP boundary', () => {
+  it('exposes only authenticated own-workspace operational summaries', async () => {
+    const id = randomUUID();
+    await db.query(
+      "INSERT INTO plans(id,scenario_id,workspace_id,strategy,snapshot,solution,hash,status,created_at) VALUES($1,$2,$3,'optimized','{}','{}',$4,'uncertain',now()-interval '20 minutes')",
+      [id, datasetA.scenario.id, adminA.principal.workspaceId, 'a'.repeat(64)],
+    );
+    await call('/operations/health', undefined, undefined, 401);
+    for (const actor of [viewerA, operatorA]) {
+      const summary = await call<{ unresolved: { count: number } }>('/operations/health', actor);
+      expect(summary.unresolved.count).toBe(1);
+    }
+    const own = await call<{
+      unresolved: { count: number; oldestAgeSeconds: number };
+      cancellationPending: { count: number };
+      executing: { count: number };
+    }>('/operations/health', adminA);
+    expect(own.unresolved.count).toBe(1);
+    expect(own.unresolved.oldestAgeSeconds).toBeGreaterThanOrEqual(1200);
+    expect(own.cancellationPending.count).toBe(0);
+    expect(own.executing.count).toBe(0);
+    expect(JSON.stringify(own)).not.toContain(id);
+    const foreign = await call<{ unresolved: { count: number; oldestAgeSeconds: null } }>(
+      '/operations/health',
+      adminB,
+    );
+    expect(foreign.unresolved).toEqual({ count: 0, oldestAgeSeconds: null });
+  });
+
   it('requires identity and leaves a new workspace empty until an administrator imports its assigned operation', async () => {
     await call('/state', undefined, undefined, 401);
     const session = await call<{ mode: string; principal: null }>('/session');
